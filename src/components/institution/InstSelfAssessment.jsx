@@ -1,11 +1,32 @@
-import { useState } from "react";
-import { AlertCircle } from "lucide-react";
+import { useState, useEffect } from "react";
+import { AlertCircle, Play, CheckCircle2 } from "lucide-react";
+import { mlApi } from "../../services/api";
 import PageHeader from "../shared/PageHeader";
 
 export default function InstSelfAssessment() {
   const [facultyRatio, setFacultyRatio] = useState(61);
   const [infraScore, setInfraScore] = useState(58);
   const [docCompleteness, setDocCompleteness] = useState(75);
+  const [backendProb, setBackendProb] = useState(null);
+
+  // Trigger ML Pre-check API (FR-ML-003)
+  useEffect(() => {
+    mlApi
+      .runPreCheck({
+        facultyRatioScore: facultyRatio,
+        infrastructureScore: infraScore,
+        documentCompletenessScore: docCompleteness,
+      })
+      .then((res) => {
+        if (res && res.simulatedProbability) {
+          setBackendProb(Math.round(res.simulatedProbability));
+        }
+      })
+      .catch((e) => {
+        // Fallback to local XGB model formula
+        setBackendProb(null);
+      });
+  }, [facultyRatio, infraScore, docCompleteness]);
 
   const raw =
     facultyRatio * 0.38 +
@@ -14,7 +35,7 @@ export default function InstSelfAssessment() {
     8 -
     (facultyRatio < 40 ? 15 : 0) -
     (docCompleteness < 50 ? 10 : 0);
-  const probability = Math.min(99, Math.max(4, Math.round(raw)));
+  const probability = backendProb ?? Math.min(99, Math.max(4, Math.round(raw)));
   const probColor = probability >= 75 ? "#059669" : probability >= 50 ? "#D97706" : "#DC2626";
   const probBg =
     probability >= 75
@@ -99,82 +120,44 @@ export default function InstSelfAssessment() {
             </div>
           ))}
         </div>
-        <div className="space-y-4">
-          <div className={`${probBg} border rounded-2xl p-8 text-center space-y-4`}>
-            <p className="text-[11px] text-slate-500 uppercase tracking-widest font-semibold">
-              Predicted Approval Probability
+
+        <div className="space-y-5">
+          <div className={`border rounded-2xl shadow-sm p-6 ${probBg}`}>
+            <p className="text-xs font-semibold uppercase tracking-wide mb-1" style={{ color: probColor }}>
+              XGBoost Simulated Outcome
             </p>
-            <div className="text-8xl font-black leading-none" style={{ color: probColor }}>
-              {probability}%
-            </div>
-            <div className="h-3 bg-white/80 rounded-full overflow-hidden mx-6 shadow-inner">
-              <div
-                className="h-full rounded-full transition-all duration-500"
-                style={{ width: `${probability}%`, background: probColor }}
-              />
+            <div className="flex items-baseline gap-2 mb-2">
+              <span className="font-mono text-5xl font-black" style={{ color: probColor }}>
+                {probability}%
+              </span>
+              <span className="text-sm font-bold text-slate-700">Approval Probability</span>
             </div>
             <p className="text-sm font-bold" style={{ color: probColor }}>
               {probLabel}
             </p>
           </div>
-          <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-5 space-y-4">
-            <h3 className="text-sm font-bold text-slate-900">SHAP Contribution Breakdown</h3>
-            {shapData.map((s) => {
-              const c = Number(s.contribution);
-              const color = c > 0 ? "#059669" : s.feature === "Base Rate (XGB)" ? "#0D9488" : "#DC2626";
-              return (
-                <div key={s.feature} className="space-y-1.5">
-                  <div className="flex justify-between text-xs">
-                    <span className="font-medium text-slate-700">{s.feature}</span>
-                    <span className="font-mono font-bold" style={{ color }}>
-                      {c > 0 ? "+" : ""}
-                      {c.toFixed(1)}pp
-                    </span>
-                  </div>
-                  <div className="relative h-2 bg-slate-100 rounded-full overflow-hidden">
-                    <div
-                      className="absolute top-0 h-full rounded-full transition-all duration-500"
-                      style={{
-                        width: `${Math.min(Math.abs(c) * 2.5, 100)}%`,
-                        background: color,
-                        left: c >= 0 ? 0 : "auto",
-                        right: c < 0 ? 0 : "auto",
-                      }}
-                    />
-                  </div>
+
+          <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6 space-y-4">
+            <h4 className="text-sm font-bold text-slate-900">SHAP Feature Impact Breakdown</h4>
+            <div className="space-y-3">
+              {shapData.map(({ feature, contribution }) => (
+                <div key={feature} className="flex items-center justify-between text-xs">
+                  <span className="font-medium text-slate-700">{feature}</span>
+                  <span
+                    className={`font-mono font-bold ${
+                      contribution > 0
+                        ? "text-emerald-600"
+                        : contribution < 0
+                          ? "text-red-600"
+                          : "text-slate-500"
+                    }`}
+                  >
+                    {contribution > 0 ? `+${contribution}%` : `${contribution}%`}
+                  </span>
                 </div>
-              );
-            })}
-          </div>
-          {probability < 75 && (
-            <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
-              <h4 className="text-xs font-bold text-amber-800 mb-2 flex items-center gap-1.5">
-                <AlertCircle size={12} />
-                Fix before submitting
-              </h4>
-              <ul className="space-y-1 text-xs text-amber-700">
-                {facultyRatio < 70 && (
-                  <li className="flex gap-2">
-                    <span className="mt-1 w-1 h-1 rounded-full bg-amber-500 shrink-0" />
-                    Verify payroll register matches declared faculty count — NLP cross-references Annexure VII
-                  </li>
-                )}
-                {infraScore < 70 && (
-                  <li className="flex gap-2">
-                    <span className="mt-1 w-1 h-1 rounded-full bg-amber-500 shrink-0" />
-                    Submit satellite-verified area certificates and independent lab valuation reports
-                  </li>
-                )}
-                {docCompleteness < 80 && (
-                  <li className="flex gap-2">
-                    <span className="mt-1 w-1 h-1 rounded-full bg-amber-500 shrink-0" />
-                    Complete all {Math.round((1 - docCompleteness / 100) * 14)} outstanding annexures before portal
-                    submission
-                  </li>
-                )}
-              </ul>
+              ))}
             </div>
-          )}
+          </div>
         </div>
       </div>
     </div>

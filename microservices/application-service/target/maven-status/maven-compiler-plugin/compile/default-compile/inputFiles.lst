@@ -1,0 +1,15 @@
+C:\Users\rgnan\OneDrive\Desktop\ugc-complaince\microservices\application-service\src\main\java\com\ugc\application\entity\DocumentSlotEntity.java
+C:\Users\rgnan\OneDrive\Desktop\ugc-complaince\microservices\application-service\src\main\java\com\ugc\application\repository\ApplicationRepository.java
+C:\Users\rgnan\OneDrive\Desktop\ugc-complaince\microservices\application-service\src\main\java\com\ugc\application\client\NlpClient.java
+C:\Users\rgnan\OneDrive\Desktop\ugc-complaince\microservices\application-service\src\main\java\com\ugc\application\dto\StatusUpdateRequest.java
+C:\Users\rgnan\OneDrive\Desktop\ugc-complaince\microservices\application-service\src\main\java\com\ugc\application\exception\GlobalExceptionHandler.java
+C:\Users\rgnan\OneDrive\Desktop\ugc-complaince\microservices\application-service\src\main\java\com\ugc\application\service\ApplicationService.java
+C:\Users\rgnan\OneDrive\Desktop\ugc-complaince\microservices\application-service\src\main\java\com\ugc\application\controller\ApplicationController.java
+C:\Users\rgnan\OneDrive\Desktop\ugc-complaince\microservices\application-service\src\main\java\com\ugc\application\config\ApplicationDataInitializer.java
+C:\Users\rgnan\OneDrive\Desktop\ugc-complaince\microservices\application-service\src\main\java\com\ugc\application\dto\ApplicationResponse.java
+C:\Users\rgnan\OneDrive\Desktop\ugc-complaince\microservices\application-service\src\main\java\com\ugc\application\repository\DocumentSlotRepository.java
+C:\Users\rgnan\OneDrive\Desktop\ugc-complaince\microservices\application-service\src\main\java\com\ugc\application\ApplicationServiceApplication.java
+C:\Users\rgnan\OneDrive\Desktop\ugc-complaince\microservices\application-service\src\main\java\com\ugc\application\dto\ApplicationCreateRequest.java
+C:\Users\rgnan\OneDrive\Desktop\ugc-complaince\microservices\application-service\src\main\java\com\ugc\application\entity\ApplicationEntity.java
+C:\Users\rgnan\OneDrive\Desktop\ugc-complaince\microservices\application-service\src\main\java\com\ugc\application\client\AnomalyClient.java
+C:\Users\rgnan\OneDrive\Desktop\ugc-complaince\microservices\application-service\src\main\java\com\ugc\application\dto\DocumentUploadRequest.java

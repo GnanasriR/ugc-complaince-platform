@@ -188,14 +188,14 @@ export const MY_APPLICATIONS = [
 ];
 
 export const CHECKLIST_ITEMS = [
-  { item: "Faculty Register (Annexure I)", done: true },
-  { item: "Fee Structure (Annexure II)", done: true },
-  { item: "Land Documents (Annexure III)", done: true },
-  { item: "Building Plan (Annexure IV)", done: true },
-  { item: "Library Register (Annexure V)", done: false },
-  { item: "Lab Inventory (Annexure VI)", done: true },
-  { item: "Payroll Register (Annexure VII)", done: true },
-  { item: "Audit Report (Annexure VIII)", done: false },
+  { id: "chk-1", name: "Faculty Register (Annexure I)", item: "Faculty Register (Annexure I)", done: true },
+  { id: "chk-2", name: "Fee Structure (Annexure II)", item: "Fee Structure (Annexure II)", done: true },
+  { id: "chk-3", name: "Land Documents (Annexure III)", item: "Land Documents (Annexure III)", done: true },
+  { id: "chk-4", name: "Building Plan (Annexure IV)", item: "Building Plan (Annexure IV)", done: true },
+  { id: "chk-5", name: "Library Register (Annexure V)", item: "Library Register (Annexure V)", done: false },
+  { id: "chk-6", name: "Lab Inventory (Annexure VI)", item: "Lab Inventory (Annexure VI)", done: true },
+  { id: "chk-7", name: "Payroll Register (Annexure VII)", item: "Payroll Register (Annexure VII)", done: true },
+  { id: "chk-8", name: "Audit Report (Annexure VIII)", item: "Audit Report (Annexure VIII)", done: false },
 ];
 
 export const STATUS_STYLES = {

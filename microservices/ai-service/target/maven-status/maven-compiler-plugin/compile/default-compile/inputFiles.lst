@@ -1,0 +1,16 @@
+C:\Users\rgnan\OneDrive\Desktop\ugc-complaince\microservices\ai-service\src\main\java\com\ugc\ai\dto\DocumentInspectionRequest.java
+C:\Users\rgnan\OneDrive\Desktop\ugc-complaince\microservices\ai-service\src\main\java\com\ugc\ai\client\MlClient.java
+C:\Users\rgnan\OneDrive\Desktop\ugc-complaince\microservices\ai-service\src\main\java\com\ugc\ai\client\NlpClient.java
+C:\Users\rgnan\OneDrive\Desktop\ugc-complaince\microservices\ai-service\src\main\java\com\ugc\ai\entity\AiReportEntity.java
+C:\Users\rgnan\OneDrive\Desktop\ugc-complaince\microservices\ai-service\src\main\java\com\ugc\ai\AiServiceApplication.java
+C:\Users\rgnan\OneDrive\Desktop\ugc-complaince\microservices\ai-service\src\main\java\com\ugc\ai\repository\AiReportRepository.java
+C:\Users\rgnan\OneDrive\Desktop\ugc-complaince\microservices\ai-service\src\main\java\com\ugc\ai\service\AiDocumentInspectionService.java
+C:\Users\rgnan\OneDrive\Desktop\ugc-complaince\microservices\ai-service\src\main\java\com\ugc\ai\entity\DocumentInspectionEntity.java
+C:\Users\rgnan\OneDrive\Desktop\ugc-complaince\microservices\ai-service\src\main\java\com\ugc\ai\repository\DocumentInspectionRepository.java
+C:\Users\rgnan\OneDrive\Desktop\ugc-complaince\microservices\ai-service\src\main\java\com\ugc\ai\dto\AiReportResponse.java
+C:\Users\rgnan\OneDrive\Desktop\ugc-complaince\microservices\ai-service\src\main\java\com\ugc\ai\client\ApplicationClient.java
+C:\Users\rgnan\OneDrive\Desktop\ugc-complaince\microservices\ai-service\src\main\java\com\ugc\ai\client\AnomalyClient.java
+C:\Users\rgnan\OneDrive\Desktop\ugc-complaince\microservices\ai-service\src\main\java\com\ugc\ai\dto\DocumentInspectionResponse.java
+C:\Users\rgnan\OneDrive\Desktop\ugc-complaince\microservices\ai-service\src\main\java\com\ugc\ai\config\AiDataInitializer.java
+C:\Users\rgnan\OneDrive\Desktop\ugc-complaince\microservices\ai-service\src\main\java\com\ugc\ai\controller\AiController.java
+C:\Users\rgnan\OneDrive\Desktop\ugc-complaince\microservices\ai-service\src\main\java\com\ugc\ai\service\AiReportGeneratorService.java

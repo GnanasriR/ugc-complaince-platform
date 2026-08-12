@@ -1,7 +1,8 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, AlertTriangle, Upload, FileSearch, RefreshCw } from "lucide-react";
 import { NLP_PARAMETERS } from "../../data";
+import { nlpApi } from "../../services/api";
 import PageHeader from "../shared/PageHeader";
 import StatusBadge from "../shared/StatusBadge";
 import MiniBar from "../shared/MiniBar";
@@ -25,13 +26,13 @@ function ParamTable({ rows }) {
           } ${p.status === "MISMATCH" && p.critical ? "bg-red-50/40" : ""}`}
         >
           <div className="flex items-center gap-2">
-            <span className="text-slate-800 font-medium">{p.param}</span>
-            {p.critical && p.status === "MISMATCH" && (
+            <span className="text-slate-800 font-medium">{p.param || p.parameterName}</span>
+            {(p.critical || p.isCritical) && p.status === "MISMATCH" && (
               <span className="text-[10px] text-red-600 font-bold bg-red-100 px-1.5 py-0.5 rounded font-mono">CRIT</span>
             )}
           </div>
-          <span className="font-mono text-slate-500 text-xs self-center">{p.declared}</span>
-          <span className="font-mono text-slate-800 text-xs font-medium self-center">{p.verified}</span>
+          <span className="font-mono text-slate-500 text-xs self-center">{p.declared || p.declaredValue}</span>
+          <span className="font-mono text-slate-800 text-xs font-medium self-center">{p.verified || p.verifiedValue}</span>
           <div className="self-center">
             <span
               className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-full font-mono ${
@@ -47,9 +48,9 @@ function ParamTable({ rows }) {
           </div>
           <div className="flex items-center gap-2 self-center">
             <div className="flex-1 h-1.5 bg-slate-200 rounded-full overflow-hidden">
-              <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${p.confidence}%` }} />
+              <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${p.confidence || p.confidenceScore || 90}%` }} />
             </div>
-            <span className="font-mono text-xs text-slate-500 shrink-0">{p.confidence}%</span>
+            <span className="font-mono text-xs text-slate-500 shrink-0">{p.confidence || p.confidenceScore || 90}%</span>
           </div>
         </div>
       ))}
@@ -83,7 +84,19 @@ export default function UGCNlp({ applications, appId }) {
   const [scanState, setScanState] = useState("idle");
   const [progress, setProgress] = useState(0);
   const [scanned, setScanned] = useState(0);
+  const [liveParams, setLiveParams] = useState(null);
   const fRef = useRef(null);
+
+  useEffect(() => {
+    if (appId) {
+      nlpApi
+        .getParametersByAppId(appId)
+        .then((data) => {
+          if (Array.isArray(data) && data.length > 0) setLiveParams(data);
+        })
+        .catch(() => {});
+    }
+  }, [appId]);
 
   if (appId && !selectedApp) {
     navigate("/ugc/nlp", { replace: true });
@@ -106,11 +119,11 @@ export default function UGCNlp({ applications, appId }) {
   };
 
   if (selectedApp) {
-    const report = buildAppReport(selectedApp);
+    const report = liveParams || buildAppReport(selectedApp);
     const mismatches = report.filter((p) => p.status === "MISMATCH").length;
     const uncertain = report.filter((p) => p.status === "UNCERTAIN").length;
     const passes = report.filter((p) => p.status === "PASS").length;
-    const critical = report.find((p) => p.status === "MISMATCH" && p.critical);
+    const critical = report.find((p) => p.status === "MISMATCH" && (p.critical || p.isCritical));
 
     return (
       <div className="p-6 min-h-full">
@@ -134,7 +147,7 @@ export default function UGCNlp({ applications, appId }) {
               <AlertTriangle size={15} className="text-red-600 mt-0.5 shrink-0" />
               <div>
                 <p className="text-sm font-bold text-red-800">
-                  Critical: {critical.param} — declared {critical.declared}, NLP-verified {critical.verified}
+                  Critical: {critical.param || critical.parameterName} — declared {critical.declared || critical.declaredValue}, NLP-verified {critical.verified || critical.verifiedValue}
                 </p>
               </div>
             </div>

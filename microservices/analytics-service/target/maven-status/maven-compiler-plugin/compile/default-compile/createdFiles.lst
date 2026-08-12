@@ -1,0 +1,7 @@
+com\ugc\analytics\controller\AnalyticsController.class
+com\ugc\analytics\service\AnalyticsService.class
+com\ugc\analytics\repository\AnalyticsRepository.class
+com\ugc\analytics\entity\Analytics.class
+com\ugc\analytics\AnalyticsServiceApplication.class
+com\ugc\analytics\entity\Report.class
+com\ugc\analytics\repository\ReportRepository.class

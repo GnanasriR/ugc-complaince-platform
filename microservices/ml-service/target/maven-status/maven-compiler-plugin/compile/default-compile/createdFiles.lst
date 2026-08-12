@@ -1,0 +1,13 @@
+com\ugc\ml\dto\SelfAssessmentResponse.class
+com\ugc\ml\repository\ShapAttributionRepository.class
+com\ugc\ml\entity\MlScoreEntity$MlScoreEntityBuilder.class
+com\ugc\ml\dto\SelfAssessmentRequest.class
+com\ugc\ml\dto\SelfAssessmentResponse$SelfAssessmentResponseBuilder.class
+com\ugc\ml\entity\ShapAttributionEntity.class
+com\ugc\ml\MlServiceApplication.class
+com\ugc\ml\config\MlDataInitializer.class
+com\ugc\ml\controller\MlController.class
+com\ugc\ml\service\MlService.class
+com\ugc\ml\repository\MlScoreRepository.class
+com\ugc\ml\entity\MlScoreEntity.class
+com\ugc\ml\entity\ShapAttributionEntity$ShapAttributionEntityBuilder.class

@@ -15,7 +15,9 @@ import GovHeader from "../gov/GovHeader";
 import Topbar from "../shared/Topbar";
 import ProfilePage from "../shared/ProfilePage";
 import NotificationsPage from "../shared/NotificationsPage";
+import AiAssistantModal from "../shared/AiAssistantModal";
 import { NOTIFICATIONS } from "../../data";
+import { useAuth } from "../../context/AuthContext";
 import UGCDashboard from "./UGCDashboard";
 import UGCPipeline from "./UGCPipeline";
 import UGCNlp from "./UGCNlp";
@@ -39,12 +41,15 @@ const VALID_VIEWS = new Set([
 export default function UGCApp({ applications }) {
   const { view, sub } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const gradient = "linear-gradient(135deg,#061A33,#0B2953)";
 
   if (!VALID_VIEWS.has(view)) {
     return <Navigate to="/ugc/dashboard" replace />;
   }
+
+  const officerName = user?.fullName || "UGC Officer";
 
   const views = {
     dashboard: <UGCDashboard />,
@@ -57,79 +62,59 @@ export default function UGCApp({ applications }) {
   };
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden">
-      <GovHeader ministry="Regulatory Analytics · UGC / AICTE" portalTag="Cycle 2024–25" />
+    <div className="flex flex-col h-screen overflow-hidden relative">
+      <GovHeader ministry="Regulatory Portal · University Grants Commission" portalTag={`Officer: ${officerName}`} />
       <div className="flex flex-1 bg-background overflow-hidden">
         <aside
           className={`shrink-0 border-r border-slate-200 bg-white flex flex-col shadow-sm transition-all duration-300 ease-in-out overflow-hidden ${
             sidebarOpen ? "w-56" : "w-16"
           }`}
         >
-          <div className={`border-b border-slate-100 ${sidebarOpen ? "px-4 py-4" : "px-2 py-3"}`} style={{ background: gradient }}>
-            <div className={`flex items-center ${sidebarOpen ? "gap-2.5 mb-3" : "justify-center mb-2"}`}>
-              <div className="w-8 h-8 bg-white/20 rounded-xl flex items-center justify-center shrink-0">
-                <Shield size={15} className="text-white" />
-              </div>
-              {sidebarOpen && (
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs font-black text-white leading-none">UGC / AICTE Portal</p>
-                  <p className="text-[9px] text-emerald-200 font-mono mt-0.5">COMPLIANCE AI</p>
+          <div className="p-3 border-b border-slate-100 flex items-center justify-between">
+            {sidebarOpen && (
+              <div className="flex items-center gap-2 px-1">
+                <div className="w-7 h-7 rounded-lg bg-emerald-700 flex items-center justify-center text-white shrink-0 font-bold text-xs">
+                  <Shield size={14} />
                 </div>
-              )}
-              {sidebarOpen && (
-                <button
-                  onClick={() => setSidebarOpen(false)}
-                  title="Collapse sidebar"
-                  className="w-7 h-7 rounded-lg flex items-center justify-center text-white/80 hover:bg-white/15 hover:text-white transition-colors shrink-0"
-                >
-                  <PanelLeftClose size={14} />
-                </button>
-              )}
-            </div>
-            {sidebarOpen && (
-              <div className="bg-white/10 rounded-lg px-3 py-2">
-                <p className="text-[10px] text-emerald-200 font-mono">Regulatory Analytics</p>
-                <p className="text-[10px] text-emerald-300 mt-0.5">Cycle 2024–25 · 4,812 apps</p>
+                <div className="min-w-0">
+                  <p className="text-xs font-bold text-slate-900 truncate">{officerName}</p>
+                  <p className="text-[10px] text-slate-400 font-mono">
+                    {user?.role === "ROLE_EVALUATOR" ? "Expert Evaluator" : "Senior Reviewer"}
+                  </p>
+                </div>
               </div>
             )}
-            {!sidebarOpen && (
-              <button
-                onClick={() => setSidebarOpen(true)}
-                title="Expand sidebar"
-                className="w-full h-8 rounded-lg flex items-center justify-center text-white/80 hover:bg-white/15 hover:text-white transition-colors"
-              >
-                <PanelLeft size={14} />
-              </button>
-            )}
+            <button
+              onClick={() => setSidebarOpen((v) => !v)}
+              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors mx-auto"
+              title={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
+            >
+              {sidebarOpen ? <PanelLeftClose size={15} /> : <PanelLeft size={15} />}
+            </button>
           </div>
-          <nav className={`flex-1 py-4 space-y-0.5 ${sidebarOpen ? "px-2" : "px-1.5"}`}>
-            {sidebarOpen && (
-              <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest px-3 pb-2">
-                Analytics Modules
-              </p>
-            )}
+          <nav className="flex-1 p-2 space-y-1 overflow-y-auto">
             {UGC_NAV.map((item) => (
               <button
                 key={item.id}
                 onClick={() => navigate(`/ugc/${item.id}`)}
                 title={!sidebarOpen ? item.label : undefined}
-                className={`relative w-full flex items-center rounded-xl text-left transition-all ${
-                  sidebarOpen ? "gap-3 px-3 py-2.5" : "justify-center px-0 py-2.5"
+                className={`w-full flex items-center transition-all font-semibold relative ${
+                  sidebarOpen ? "gap-3 px-3 py-2.5 rounded-xl text-left" : "justify-center px-0 py-2.5 rounded-xl"
                 } ${
                   view === item.id
-                    ? "bg-emerald-50 text-emerald-700 font-semibold"
-                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+                    ? "bg-emerald-50 text-emerald-700 shadow-sm"
+                    : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
                 }`}
               >
                 <item.icon
-                  size={14}
-                  className={`shrink-0 ${view === item.id ? "text-emerald-600" : "text-slate-400"}`}
+                  size={16}
+                  className={`shrink-0 ${view === item.id ? "text-emerald-700" : "text-slate-400"}`}
                 />
                 {sidebarOpen && (
                   <>
                     <span className="text-[13px]">{item.label}</span>
                     {item.id === "anomaly" && (
-                      <span className="ml-auto text-[10px] bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center font-bold shrink-0">
+                      <span className="ml-auto bg-red-100 text-red-700 text-[10px] font-bold px-1.5 py-0.5 rounded-full font-mono">
                         5
                       </span>
                     )}
@@ -168,6 +153,9 @@ export default function UGCApp({ applications }) {
           <main className="flex-1 overflow-y-auto scrollbar-none">{views[view]}</main>
         </div>
       </div>
+
+      {/* Floating AI Assistant */}
+      <AiAssistantModal />
     </div>
   );
 }

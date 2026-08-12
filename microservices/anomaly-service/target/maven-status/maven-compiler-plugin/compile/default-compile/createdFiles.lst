@@ -1,0 +1,9 @@
+com\ugc\anomaly\AnomalyServiceApplication.class
+com\ugc\anomaly\config\AnomalyDataInitializer.class
+com\ugc\anomaly\entity\AnomalyEntity$AnomalyEntityBuilder.class
+com\ugc\anomaly\entity\AnomalyEntity.class
+com\ugc\anomaly\exception\GlobalExceptionHandler.class
+com\ugc\anomaly\service\AnomalyService.class
+com\ugc\anomaly\controller\AnomalyController.class
+com\ugc\anomaly\exception\ResourceNotFoundException.class
+com\ugc\anomaly\repository\AnomalyRepository.class

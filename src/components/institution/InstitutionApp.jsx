@@ -14,7 +14,9 @@ import GovHeader from "../gov/GovHeader";
 import Topbar from "../shared/Topbar";
 import ProfilePage from "../shared/ProfilePage";
 import NotificationsPage from "../shared/NotificationsPage";
+import AiAssistantModal from "../shared/AiAssistantModal";
 import { NOTIFICATIONS } from "../../data";
+import { useAuth } from "../../context/AuthContext";
 import InstDashboard from "./InstDashboard";
 import InstSubmit from "./InstSubmit";
 import InstSelfAssessment from "./InstSelfAssessment";
@@ -36,12 +38,15 @@ const VALID_VIEWS = new Set([
 export default function InstitutionApp({ myApplications, onSubmitApplication }) {
   const { view } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const gradient = "linear-gradient(135deg,#0B2953,#123B6B)";
 
   if (!VALID_VIEWS.has(view)) {
     return <Navigate to="/institution/dashboard" replace />;
   }
+
+  const instName = user?.institutionName || user?.fullName || "Institution Portal";
 
   const views = {
     dashboard: <InstDashboard myApplications={myApplications} />,
@@ -53,69 +58,54 @@ export default function InstitutionApp({ myApplications, onSubmitApplication }) 
   };
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden">
-      <GovHeader ministry="Institution Portal · University Grants Commission" portalTag="Deccan Inst. of Mgmt." />
+    <div className="flex flex-col h-screen overflow-hidden relative">
+      <GovHeader ministry="Institution Portal · University Grants Commission" portalTag={instName} />
       <div className="flex flex-1 bg-background overflow-hidden">
         <aside
           className={`shrink-0 border-r border-slate-200 bg-white flex flex-col shadow-sm transition-all duration-300 ease-in-out overflow-hidden ${
             sidebarOpen ? "w-56" : "w-16"
           }`}
         >
-          <div className={`border-b border-slate-100 ${sidebarOpen ? "px-4 py-4" : "px-2 py-3"}`} style={{ background: gradient }}>
-            <div className={`flex items-center ${sidebarOpen ? "gap-2.5 mb-3" : "justify-center mb-2"}`}>
-              <div className="w-8 h-8 bg-white/20 rounded-xl flex items-center justify-center shrink-0">
-                <Building2 size={15} className="text-white" />
-              </div>
-              {sidebarOpen && (
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs font-black text-white leading-none">Institution Portal</p>
-                  <p className="text-[9px] text-emerald-200 font-mono mt-0.5">COMPLIANCE AI</p>
+          <div className="p-3 border-b border-slate-100 flex items-center justify-between">
+            {sidebarOpen && (
+              <div className="flex items-center gap-2 px-1">
+                <div className="w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center text-white shrink-0 font-bold text-xs">
+                  <Building2 size={14} />
                 </div>
-              )}
-              {sidebarOpen && (
-                <button
-                  onClick={() => setSidebarOpen(false)}
-                  title="Collapse sidebar"
-                  className="w-7 h-7 rounded-lg flex items-center justify-center text-white/80 hover:bg-white/15 hover:text-white transition-colors shrink-0"
-                >
-                  <PanelLeftClose size={14} />
-                </button>
-              )}
-            </div>
-            {sidebarOpen && (
-              <div className="bg-white/10 rounded-lg px-3 py-2">
-                <p className="text-[10px] text-emerald-200 font-mono leading-none">Deccan Inst. of Mgmt.</p>
-                <p className="text-[10px] text-emerald-300 mt-0.5">APP-2024-0893 · Under Review</p>
+                <div className="min-w-0">
+                  <p className="text-xs font-bold text-slate-900 truncate">{instName}</p>
+                  <p className="text-[10px] text-slate-400 font-mono">
+                    {user?.email ? user.email.split("@")[0] : "INST-2024-048"}
+                  </p>
+                </div>
               </div>
             )}
-            {!sidebarOpen && (
-              <button
-                onClick={() => setSidebarOpen(true)}
-                title="Expand sidebar"
-                className="w-full h-8 rounded-lg flex items-center justify-center text-white/80 hover:bg-white/15 hover:text-white transition-colors"
-              >
-                <PanelLeft size={14} />
-              </button>
-            )}
+            <button
+              onClick={() => setSidebarOpen((v) => !v)}
+              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors mx-auto"
+              title={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
+            >
+              {sidebarOpen ? <PanelLeftClose size={15} /> : <PanelLeft size={15} />}
+            </button>
           </div>
-          <nav className={`flex-1 py-4 space-y-0.5 ${sidebarOpen ? "px-2" : "px-1.5"}`}>
-            {sidebarOpen && (
-              <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest px-3 pb-2">My Portal</p>
-            )}
+          <nav className="flex-1 p-2 space-y-1 overflow-y-auto">
             {INST_NAV.map((item) => (
               <button
                 key={item.id}
                 onClick={() => navigate(`/institution/${item.id}`)}
                 title={!sidebarOpen ? item.label : undefined}
-                className={`w-full flex items-center rounded-xl text-left transition-all ${
-                  sidebarOpen ? "gap-3 px-3 py-2.5" : "justify-center px-0 py-2.5"
+                className={`w-full flex items-center transition-all font-semibold ${
+                  sidebarOpen ? "gap-3 px-3 py-2.5 rounded-xl text-left" : "justify-center px-0 py-2.5 rounded-xl"
                 } ${
                   view === item.id
-                    ? "bg-emerald-50 text-emerald-700 font-semibold"
-                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+                    ? "bg-emerald-50 text-emerald-700 shadow-sm"
+                    : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
                 }`}
               >
-                <item.icon size={14} className={`shrink-0 ${view === item.id ? "text-emerald-600" : "text-slate-400"}`} />
+                <item.icon
+                  size={16}
+                  className={`shrink-0 ${view === item.id ? "text-emerald-600" : "text-slate-400"}`}
+                />
                 {sidebarOpen && (
                   <>
                     <span className="text-[13px]">{item.label}</span>
@@ -149,6 +139,9 @@ export default function InstitutionApp({ myApplications, onSubmitApplication }) 
           <main className="flex-1 overflow-y-auto scrollbar-none">{views[view]}</main>
         </div>
       </div>
+
+      {/* Floating AI Assistant */}
+      <AiAssistantModal />
     </div>
   );
 }

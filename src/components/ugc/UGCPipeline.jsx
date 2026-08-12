@@ -1,13 +1,16 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Download, Search, Eye, Bell } from "lucide-react";
 import PageHeader from "../shared/PageHeader";
 import StatusBadge from "../shared/StatusBadge";
 import MiniBar from "../shared/MiniBar";
 
 export default function UGCPipeline({ applications }) {
+  const navigate = useNavigate();
   const [filter, setFilter] = useState("All");
   const [search, setSearch] = useState("");
   const statuses = ["All", "New", "Approved", "Under Review", "Flagged", "Escalated", "Rejected"];
+
   const filtered = applications.filter(
     (a) =>
       (filter === "All" || a.status === filter) &&
@@ -16,10 +19,21 @@ export default function UGCPipeline({ applications }) {
 
   return (
     <div className="p-6 min-h-full">
-      <PageHeader title="Application Pipeline" subtitle="ML-ranked queue · replacing 8–12 hr manual review">
-        <button className="flex items-center gap-1.5 text-sm text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 px-3 py-1.5 rounded-lg font-medium">
+      <PageHeader title="Application Pipeline Queue" subtitle="ML-ranked queue · real-time NLP scoring & verification">
+        <button
+          onClick={() => {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(filtered));
+            const downloadAnchor = document.createElement("a");
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", "ugc_applications_pipeline.json");
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+          }}
+          className="flex items-center gap-1.5 text-sm text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 px-3 py-1.5 rounded-lg font-medium cursor-pointer transition-colors"
+        >
           <Download size={13} />
-          Export
+          Export JSON
         </button>
       </PageHeader>
       <div className="flex items-center gap-3 mb-4 flex-wrap">
@@ -28,7 +42,7 @@ export default function UGCPipeline({ applications }) {
             <button
               key={s}
               onClick={() => setFilter(s)}
-              className={`px-3 py-1.5 rounded text-xs transition-all ${
+              className={`px-3 py-1.5 rounded text-xs transition-all cursor-pointer ${
                 filter === s ? "bg-emerald-600 text-white font-bold" : "text-slate-600 hover:text-slate-900"
               }`}
             >
@@ -41,7 +55,7 @@ export default function UGCPipeline({ applications }) {
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search…"
+            placeholder="Search by ID or Institution…"
             className="bg-white border border-slate-200 rounded-lg pl-9 pr-4 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-200 shadow-sm w-64"
           />
         </div>
@@ -50,7 +64,7 @@ export default function UGCPipeline({ applications }) {
         <table className="w-full">
           <thead>
             <tr className="bg-slate-50 border-b border-slate-200">
-              {["Application ID", "Institution", "Type", "NLP Score", "ML Prob.", "Risk", "Status", ""].map((h) => (
+              {["Application ID", "Institution", "Type", "NLP Score", "ML Prob.", "Risk", "Status", "Actions"].map((h) => (
                 <th
                   key={h}
                   className="text-left text-[10px] text-slate-500 font-semibold uppercase tracking-wider px-4 py-3 first:pl-5"
@@ -69,7 +83,9 @@ export default function UGCPipeline({ applications }) {
                 }`}
               >
                 <td className="px-4 py-3.5 pl-5">
-                  <span className="font-mono text-[11px] text-slate-500 bg-slate-100 px-2 py-0.5 rounded">{app.id}</span>
+                  <span className="font-mono text-[11px] text-slate-500 bg-slate-100 px-2 py-0.5 rounded font-bold">
+                    {app.id}
+                  </span>
                 </td>
                 <td className="px-4 py-3.5">
                   <p className="text-sm font-semibold text-slate-900">{app.name}</p>
@@ -117,12 +133,20 @@ export default function UGCPipeline({ applications }) {
                   <StatusBadge status={app.status} />
                 </td>
                 <td className="px-4 py-3.5 pr-5">
-                  <div className="flex gap-2">
-                    <button className="text-slate-400 hover:text-emerald-600 p-1 hover:bg-emerald-50 rounded transition-colors">
-                      <Eye size={13} />
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      onClick={() => navigate(`/ugc/nlp/${app.id}`)}
+                      title="Inspect NLP Parameters"
+                      className="text-slate-500 hover:text-emerald-600 p-1.5 hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer"
+                    >
+                      <Eye size={15} />
                     </button>
-                    <button className="text-slate-400 hover:text-amber-600 p-1 hover:bg-amber-50 rounded transition-colors">
-                      <Bell size={13} />
+                    <button
+                      onClick={() => navigate("/ugc/anomaly")}
+                      title="Check Anomalies"
+                      className="text-slate-500 hover:text-amber-600 p-1.5 hover:bg-amber-50 rounded-lg transition-colors cursor-pointer"
+                    >
+                      <Bell size={15} />
                     </button>
                   </div>
                 </td>

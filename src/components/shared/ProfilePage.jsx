@@ -10,51 +10,50 @@ import {
   Settings,
   LogOut,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 import PageHeader from "./PageHeader";
 
 export default function ProfilePage({ portal }) {
-  const info =
-    portal === "institution"
-      ? {
-          name: "Deccan Institute of Management",
-          role: "Institution Administrator",
-          contact: "Dr. Aarav Mehta",
-          email: "registrar@deccan-mgmt.edu.in",
-          phone: "+91 98450 12233",
-          location: "Hyderabad, Telangana",
-          since: "Registered March 2019",
-          tag: "APP-2024-0893 · Under Review",
-          gradient: "linear-gradient(135deg,#065F46,#0D9488)",
-          icon: Building2,
-          stats: [
-            { l: "Applications filed", v: "3" },
-            { l: "Documents on file", v: "42" },
-            { l: "Compliance score", v: "86%" },
-          ],
-        }
-      : {
-          name: "Dr. Priya Ramanathan",
-          role: "Senior Compliance Reviewer, UGC/AICTE",
-          contact: "Regulatory Analytics Division",
-          email: "p.ramanathan@ugc.gov.in",
-          phone: "+91 11 2323 4567",
-          location: "New Delhi",
-          since: "On panel since 2016",
-          tag: "Cycle 2024–25 · 312 apps reviewed",
-          gradient: "linear-gradient(135deg,#052E2B,#059669)",
-          icon: Shield,
-          stats: [
-            { l: "Reviewed this cycle", v: "312" },
-            { l: "Anomalies flagged", v: "28" },
-            { l: "Avg. review time", v: "2.4d" },
-          ],
-        };
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
+
+  const handleSignOut = () => {
+    logout();
+    navigate("/");
+  };
+
+  const isInst = portal === "institution";
+
+  const info = {
+    name: user?.institutionName || user?.fullName || (isInst ? "Institution Account" : "UGC Officer Account"),
+    role: user?.role === "ROLE_UGC_OFFICER" ? "UGC / AICTE Officer" : user?.role === "ROLE_EVALUATOR" ? "Expert Evaluator" : "Institution Representative",
+    contact: user?.fullName || "Authorised User",
+    email: user?.email || "user@domain.ac.in",
+    phone: user?.mobileNumber || "+91 98765 43210",
+    location: isInst ? "Bengaluru, Karnataka" : "New Delhi",
+    since: "Registered User Account",
+    tag: user?.status ? `Status: ${user.status}` : "Verified Active Session",
+    gradient: isInst ? "linear-gradient(135deg,#065F46,#0D9488)" : "linear-gradient(135deg,#052E2B,#059669)",
+    icon: isInst ? Building2 : Shield,
+    stats: isInst
+      ? [
+          { l: "Applications filed", v: "1" },
+          { l: "Documents uploaded", v: "8" },
+          { l: "Compliance status", v: "Valid" },
+        ]
+      : [
+          { l: "Reviewed this cycle", v: "312" },
+          { l: "Anomalies flagged", v: "28" },
+          { l: "Avg. review time", v: "2.4d" },
+        ],
+  };
 
   const Icon = info.icon;
 
   return (
     <div className="p-6 min-h-full">
-      <PageHeader title="Profile" subtitle="Account details and activity summary" />
+      <PageHeader title="User Profile & Settings" subtitle="Logged-in account credentials and session preferences" />
       <div className="grid grid-cols-3 gap-5">
         <div className="col-span-1 bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden h-fit">
           <div className="p-6 text-center" style={{ background: info.gradient }}>
@@ -125,9 +124,12 @@ export default function ProfilePage({ portal }) {
               ))}
             </div>
           </div>
-          <button className="flex items-center gap-2 text-xs font-semibold text-red-600 bg-red-50 border border-red-200 hover:bg-red-100 px-4 py-2.5 rounded-xl">
+          <button
+            onClick={handleSignOut}
+            className="flex items-center gap-2 text-xs font-semibold text-red-600 bg-red-50 border border-red-200 hover:bg-red-100 px-4 py-2.5 rounded-xl cursor-pointer transition-colors"
+          >
             <LogOut size={13} />
-            Sign out
+            Sign Out
           </button>
         </div>
       </div>

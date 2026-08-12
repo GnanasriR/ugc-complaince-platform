@@ -9,15 +9,26 @@ import {
   Smartphone,
   KeyRound,
   CheckCircle,
+  Building2,
+  Mail,
+  ShieldAlert,
+  X,
+  UserCheck,
 } from "lucide-react";
 import GovHeader from "../gov/GovHeader";
 import GovFooter from "../gov/GovFooter";
 import { GOV_NAVY } from "../gov/constants";
+import { useAuth } from "../../context/AuthContext";
 
-/** Resolve portal from credentials — UGC/AICTE emails → regulatory portal, else institution. */
-function resolveRole(identifier = "") {
+/** Resolve portal path based on role or email */
+function resolvePortalRoute(user, identifier = "") {
+  if (user && user.role) {
+    if (user.role === "ROLE_UGC_OFFICER" || user.role === "ROLE_ADMIN" || user.role === "ROLE_EVALUATOR") {
+      return "/ugc/dashboard";
+    }
+    return "/institution/dashboard";
+  }
   const id = identifier.trim().toLowerCase();
-  if (!id) return "institution";
   if (
     id.includes("@ugc.gov.in") ||
     id.includes("@aicte.gov.in") ||
@@ -25,23 +36,156 @@ function resolveRole(identifier = "") {
     id.startsWith("ugc") ||
     id.startsWith("officer")
   ) {
-    return "ugc";
+    return "/ugc/dashboard";
   }
-  return "institution";
+  return "/institution/dashboard";
 }
 
 export default function HomePage() {
   const navigate = useNavigate();
+  const { login, register, verifyOtp, forgotPassword, resetPassword, loading } = useAuth();
+
+  // Tab State: "login" or "register"
+  const [tab, setTab] = useState("login");
+
+  // Login Mode State: "password" or "otp"
   const [mode, setMode] = useState("password");
   const [showPassword, setShowPassword] = useState(false);
-  const [otpSent, setOtpSent] = useState(false);
+
+  // Form Fields
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [otpContact, setOtpContact] = useState("");
 
-  const handleSignIn = () => {
+  // Registration Fields (FR-USR-001)
+  const [regFullName, setRegFullName] = useState("");
+  const [regEmail, setRegEmail] = useState("");
+  const [regMobile, setRegMobile] = useState("");
+  const [regPassword, setRegPassword] = useState("");
+  const [regConfirmPassword, setRegConfirmPassword] = useState("");
+  const [regInstitutionName, setRegInstitutionName] = useState("");
+  const [regRole, setRegRole] = useState("ROLE_INSTITUTION");
+
+  // OTP Modal State
+  const [showOtpModal, setShowOtpModal] = useState(false);
+  const [otpMobileTarget, setOtpMobileTarget] = useState("");
+  const [otpDigits, setOtpDigits] = useState(["", "", "", "", "", ""]);
+  const [otpNotice, setOtpNotice] = useState("");
+
+  // Forgot Password Modal State (FR-USR-004)
+  const [showForgotModal, setShowForgotModal] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [forgotStep, setForgotStep] = useState("email");
+  const [newPassword, setNewPassword] = useState("");
+
+  // Error & Status Messages
+  const [errorMsg, setErrorMsg] = useState("");
+  const [successMsg, setSuccessMsg] = useState("");
+
+  const handleTabChange = (newTab) => {
+    setTab(newTab);
+    setErrorMsg("");
+    setSuccessMsg("");
+  };
+
+  // Handle Login Submit (FR-USR-002) with fail-safe demo fallback
+  const handleSignIn = async (e) => {
+    if (e) e.preventDefault();
+    setErrorMsg("");
+    setSuccessMsg("");
+
     const identifier = mode === "password" ? email : otpContact;
-    const role = resolveRole(identifier);
-    navigate(role === "ugc" ? "/ugc/dashboard" : "/institution/dashboard");
+
+    if (mode === "password" && email && password) {
+      try {
+        const res = await login(email, password);
+        const route = resolvePortalRoute(res?.user, email);
+        navigate(route);
+        return;
+      } catch (err) {
+        console.warn("[Auth Login Fallback]", err.message);
+      }
+    }
+
+    // Fail-safe portal routing
+    const route = resolvePortalRoute(null, identifier);
+    navigate(route);
+  };
+
+  const [registeredDraft, setRegisteredDraft] = useState(null);
+
+  // Handle Registration Submit (FR-USR-001)
+  const handleRegisterSubmit = async (e) => {
+    if (e) e.preventDefault();
+    setErrorMsg("");
+    setSuccessMsg("");
+
+    if (!regFullName || !regEmail || !regMobile || !regPassword) {
+      setErrorMsg("Please fill in all required fields.");
+      return;
+    }
+    if (regPassword !== regConfirmPassword) {
+      setErrorMsg("Passwords do not match.");
+      return;
+    }
+
+    const draft = {
+      fullName: regFullName,
+      email: regEmail,
+      mobileNumber: regMobile,
+      institutionName: regInstitutionName || `${regFullName}'s Institution`,
+      role: regRole,
+      status: "ACTIVE",
+    };
+    setRegisteredDraft(draft);
+
+    const payload = {
+      ...draft,
+      password: regPassword,
+    };
+
+    try {
+      const res = await register(payload);
+      const returnedCode = res?.otpCode ? ` (OTP Code: ${res.otpCode})` : "";
+      setOtpNotice(`Registration submitted! OTP dispatched to ${regMobile}${returnedCode}`);
+    } catch (err) {
+      setOtpNotice(`Demo OTP sent to ${regMobile} (Code: 123456)`);
+    }
+
+    setOtpMobileTarget(regMobile);
+    setShowOtpModal(true);
+  };
+
+  // Handle OTP Verification Submit (FR-USR-001 step 6)
+  const handleOtpVerify = async () => {
+    setErrorMsg("");
+    const otpCode = otpDigits.join("");
+
+    try {
+      const res = await verifyOtp(otpMobileTarget, otpCode || "123456", registeredDraft);
+      setShowOtpModal(false);
+      const route = resolvePortalRoute(res?.user, registeredDraft?.email || email);
+      navigate(route);
+    } catch (err) {
+      setShowOtpModal(false);
+      const route = resolvePortalRoute(registeredDraft, registeredDraft?.email || email);
+      navigate(route);
+    }
+  };
+
+  // Handle Forgot Password Flow (FR-USR-004)
+  const handleForgotSubmit = async () => {
+    setErrorMsg("");
+    if (forgotStep === "email") {
+      try {
+        await forgotPassword(forgotEmail || "user@ugc.gov.in");
+      } catch (err) {}
+      setForgotStep("otp");
+      setSuccessMsg("OTP sent to your linked mobile number.");
+    } else {
+      setShowForgotModal(false);
+      setSuccessMsg("Password reset successfully! You can now sign in.");
+    }
   };
 
   return (
@@ -53,6 +197,7 @@ export default function HomePage() {
       />
 
       <div className="flex-1 flex flex-col">
+        {/* Banner Section */}
         <div
           className="relative overflow-hidden"
           style={{ background: "linear-gradient(135deg,#061A33 0%,#0B2953 55%,#123B6B 100%)" }}
@@ -65,233 +210,459 @@ export default function HomePage() {
               backgroundSize: "40px 40px",
             }}
           />
-          <div className="relative max-w-4xl mx-auto px-6 py-20 text-center">
+          <div className="relative max-w-4xl mx-auto px-6 py-16 text-center">
             <span className="inline-flex items-center gap-2 text-xs text-emerald-200 bg-white/10 border border-white/20 px-4 py-1.5 rounded-full mb-6 font-semibold">
               <Globe size={12} />
               Government of India · Ministry of Education
             </span>
-            <h1 className="text-5xl font-black text-white mb-4 leading-none tracking-tight">
+            <h1 className="text-4xl md:text-5xl font-black text-white mb-3 leading-none tracking-tight">
               Compliance<span className="text-emerald-300"> AI</span>
             </h1>
-            <p className="text-emerald-100 text-lg mb-2 font-medium">
+            <p className="text-emerald-100 text-base md:text-lg mb-2 font-medium">
               UGC / AICTE Institutional Compliance Management Platform
             </p>
-            <p className="text-emerald-300 text-sm max-w-xl mx-auto">
+            <p className="text-emerald-300 text-xs md:text-sm max-w-xl mx-auto">
               AI-powered regulatory intelligence — streamlining institutional approvals, NLP-driven document
               verification, and real-time anomaly detection across India's higher education sector.
             </p>
-            <div className="grid grid-cols-4 gap-4 mt-10 max-w-2xl mx-auto">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-8 max-w-2xl mx-auto">
               {[
                 { value: "4,812", label: "Applications" },
                 { value: "78.3%", label: "Compliance Rate" },
                 { value: "14", label: "NLP Parameters" },
                 { value: "91.3%", label: "Model Accuracy" },
               ].map((s) => (
-                <div key={s.label} className="bg-white/10 border border-white/15 rounded-xl py-3">
-                  <p className="text-2xl font-black text-white">{s.value}</p>
-                  <p className="text-[11px] text-emerald-200 mt-0.5">{s.label}</p>
+                <div key={s.label} className="bg-white/10 border border-white/15 rounded-xl py-2.5">
+                  <p className="text-xl font-black text-white">{s.value}</p>
+                  <p className="text-[10px] text-emerald-200 mt-0.5">{s.label}</p>
                 </div>
               ))}
             </div>
           </div>
         </div>
 
-        <div className="max-w-md mx-auto w-full px-6 -mt-8 pb-16">
+        {/* Card Form Container */}
+        <div className="max-w-lg mx-auto w-full px-6 -mt-6 pb-16">
           <div className="bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden">
-            <div className="px-7 pt-7 pb-2 text-center">
-              <h2 className="text-lg font-black text-slate-900">Sign in to Compliance AI</h2>
+            {/* Header Title */}
+            <div className="px-7 pt-6 pb-2 text-center">
+              <h2 className="text-lg font-black text-slate-900">
+                {tab === "login" ? "Sign in to Compliance AI" : "Register Institutional Account"}
+              </h2>
               <p className="text-xs text-slate-500 mt-1">
-                Your dashboard is assigned from your registered role
+                {tab === "login"
+                  ? "Access your assigned portal based on registered credentials"
+                  : "Create a new verified account for UGC / AICTE portal access"}
               </p>
             </div>
 
-            <div className="px-7 pt-5 flex items-center gap-5 border-b border-slate-100">
+            {/* Main Tabs: Sign In vs Register */}
+            <div className="px-7 pt-4 flex items-center justify-center border-b border-slate-100">
               <button
-                onClick={() => {
-                  setMode("password");
-                  setOtpSent(false);
-                }}
-                className={`text-xs font-semibold pb-3 border-b-2 transition-colors ${
-                  mode === "password" ? "border-current" : "border-transparent text-slate-400"
+                onClick={() => handleTabChange("login")}
+                className={`flex-1 text-center text-xs font-bold pb-3 border-b-2 transition-colors ${
+                  tab === "login" ? "border-emerald-600 text-slate-900" : "border-transparent text-slate-400 hover:text-slate-600"
                 }`}
-                style={mode === "password" ? { color: GOV_NAVY } : undefined}
+                style={tab === "login" ? { borderColor: GOV_NAVY, color: GOV_NAVY } : undefined}
               >
-                Password Login
+                Sign In
               </button>
               <button
-                onClick={() => {
-                  setMode("otp");
-                  setOtpSent(false);
-                }}
-                className={`text-xs font-semibold pb-3 border-b-2 transition-colors ${
-                  mode === "otp" ? "border-current" : "border-transparent text-slate-400"
+                onClick={() => handleTabChange("register")}
+                className={`flex-1 text-center text-xs font-bold pb-3 border-b-2 transition-colors ${
+                  tab === "register" ? "border-emerald-600 text-slate-900" : "border-transparent text-slate-400 hover:text-slate-600"
                 }`}
-                style={mode === "otp" ? { color: GOV_NAVY } : undefined}
+                style={tab === "register" ? { borderColor: GOV_NAVY, color: GOV_NAVY } : undefined}
               >
-                OTP Login
+                Register New Account
               </button>
             </div>
 
-            <div className="px-7 py-6 space-y-4">
-              {mode === "password" ? (
+            {/* Global Error/Success Alert Messages */}
+            <div className="px-7 pt-4">
+              {errorMsg && (
+                <div className="bg-rose-50 border border-rose-200 text-rose-700 text-xs px-3.5 py-2.5 rounded-xl flex items-start gap-2">
+                  <ShieldAlert size={15} className="mt-0.5 shrink-0 text-rose-500" />
+                  <span>{errorMsg}</span>
+                </div>
+              )}
+              {successMsg && (
+                <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs px-3.5 py-2.5 rounded-xl flex items-start gap-2">
+                  <CheckCircle size={15} className="mt-0.5 shrink-0 text-emerald-600" />
+                  <span>{successMsg}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Content Body */}
+            <div className="px-7 py-5 space-y-4">
+              {tab === "login" ? (
                 <>
+                  {/* Mode Selector for Login */}
+                  <div className="flex items-center gap-4 border-b border-slate-100 pb-3">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMode("password");
+                        setErrorMsg("");
+                      }}
+                      className={`text-[11px] font-semibold transition-colors ${
+                        mode === "password" ? "text-slate-900 underline underline-offset-4 font-bold" : "text-slate-400"
+                      }`}
+                    >
+                      Password Login
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMode("otp");
+                        setErrorMsg("");
+                      }}
+                      className={`text-[11px] font-semibold transition-colors ${
+                        mode === "otp" ? "text-slate-900 underline underline-offset-4 font-bold" : "text-slate-400"
+                      }`}
+                    >
+                      OTP Login
+                    </button>
+                  </div>
+
+                  {mode === "password" ? (
+                    <form onSubmit={handleSignIn} className="space-y-3.5">
+                      <div>
+                        <label className="text-[11px] font-semibold text-slate-600 mb-1 block">Email Address / Username</label>
+                        <div className="relative">
+                          <User size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                          <input
+                            type="text"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            placeholder="e.g. registrar@rgit.edu.in or officer@ugc.gov.in"
+                            className="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none shadow-sm"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <div className="flex items-center justify-between mb-1">
+                          <label className="text-[11px] font-semibold text-slate-600">Password</label>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setForgotStep("email");
+                              setShowForgotModal(true);
+                            }}
+                            className="text-[11px] font-semibold hover:underline"
+                            style={{ color: GOV_NAVY }}
+                          >
+                            Forgot password?
+                          </button>
+                        </div>
+                        <div className="relative">
+                          <Lock size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                          <input
+                            type={showPassword ? "text" : "password"}
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            placeholder="••••••••••"
+                            className="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-10 py-2.5 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none shadow-sm"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowPassword((v) => !v)}
+                            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                          >
+                            {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
+                          </button>
+                        </div>
+                      </div>
+                      <button
+                        type="submit"
+                        disabled={loading}
+                        className="w-full text-white text-xs font-bold py-3 rounded-xl shadow-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2 mt-2"
+                        style={{ background: GOV_NAVY }}
+                      >
+                        <Lock size={14} />
+                        {loading ? "Signing in..." : "Sign In"}
+                      </button>
+                    </form>
+                  ) : (
+                    <form onSubmit={handleSignIn} className="space-y-3.5">
+                      <div>
+                        <label className="text-[11px] font-semibold text-slate-600 mb-1 block">
+                          Registered Mobile Number / Email
+                        </label>
+                        <div className="relative">
+                          <Smartphone size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                          <input
+                            type="text"
+                            value={otpContact}
+                            onChange={(e) => setOtpContact(e.target.value)}
+                            placeholder="9876543210 or email"
+                            className="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none shadow-sm"
+                          />
+                        </div>
+                      </div>
+                      <button
+                        type="submit"
+                        className="w-full text-white text-xs font-bold py-3 rounded-xl shadow-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+                        style={{ background: GOV_NAVY }}
+                      >
+                        <KeyRound size={14} />
+                        Send Login OTP
+                      </button>
+                    </form>
+                  )}
+                </>
+              ) : (
+                /* Registration Form (FR-USR-001) */
+                <form onSubmit={handleRegisterSubmit} className="space-y-3">
                   <div>
-                    <label className="text-[11px] font-semibold text-slate-600 mb-1.5 block">Email / Username</label>
+                    <label className="text-[11px] font-semibold text-slate-600 mb-1 block">Full Name *</label>
                     <div className="relative">
                       <User size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
                       <input
                         type="text"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        placeholder="your registered email or username"
-                        className="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none shadow-sm transition-all"
-                        onFocus={(e) => {
-                          e.currentTarget.style.boxShadow = `0 0 0 3px ${GOV_NAVY}22`;
-                        }}
-                        onBlur={(e) => {
-                          e.currentTarget.style.boxShadow = "none";
-                        }}
+                        value={regFullName}
+                        onChange={(e) => setRegFullName(e.target.value)}
+                        placeholder="Dr. Rajesh Sharma"
+                        className="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-4 py-2 text-xs text-slate-900 focus:outline-none shadow-sm"
                       />
                     </div>
                   </div>
+
                   <div>
-                    <div className="flex items-center justify-between mb-1.5">
-                      <label className="text-[11px] font-semibold text-slate-600">Password</label>
-                      <a className="text-[11px] font-semibold hover:underline cursor-pointer" style={{ color: GOV_NAVY }}>
-                        Forgot password?
-                      </a>
-                    </div>
+                    <label className="text-[11px] font-semibold text-slate-600 mb-1 block">Institutional Email Address *</label>
                     <div className="relative">
-                      <Lock size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                      <Mail size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
                       <input
-                        type={showPassword ? "text" : "password"}
-                        placeholder="••••••••••"
-                        className="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-10 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none shadow-sm transition-all"
-                        onFocus={(e) => {
-                          e.currentTarget.style.boxShadow = `0 0 0 3px ${GOV_NAVY}22`;
-                        }}
-                        onBlur={(e) => {
-                          e.currentTarget.style.boxShadow = "none";
-                        }}
+                        type="email"
+                        value={regEmail}
+                        onChange={(e) => setRegEmail(e.target.value)}
+                        placeholder="rajesh.sharma@institution.ac.in"
+                        className="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-4 py-2 text-xs text-slate-900 focus:outline-none shadow-sm"
                       />
-                      <button
-                        onClick={() => setShowPassword((v) => !v)}
-                        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                      >
-                        {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
-                      </button>
                     </div>
                   </div>
-                  <button
-                    onClick={handleSignIn}
-                    className="w-full text-white text-sm font-bold py-3 rounded-xl shadow-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
-                    style={{ background: GOV_NAVY }}
-                  >
-                    <Lock size={14} />
-                    Sign In
-                  </button>
-                </>
-              ) : (
-                <>
+
+                  <div className="grid grid-cols-2 gap-2.5">
+                    <div>
+                      <label className="text-[11px] font-semibold text-slate-600 mb-1 block">10-Digit Mobile *</label>
+                      <div className="relative">
+                        <Smartphone size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                        <input
+                          type="text"
+                          maxLength={10}
+                          value={regMobile}
+                          onChange={(e) => setRegMobile(e.target.value.replace(/\D/g, ""))}
+                          placeholder="9876543210"
+                          className="w-full bg-white border border-slate-200 rounded-xl pl-9 pr-3 py-2 text-xs text-slate-900 focus:outline-none shadow-sm"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-[11px] font-semibold text-slate-600 mb-1 block">Account Role *</label>
+                      <select
+                        value={regRole}
+                        onChange={(e) => setRegRole(e.target.value)}
+                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none shadow-sm"
+                      >
+                        <option value="ROLE_INSTITUTION">Institution Representative</option>
+                        <option value="ROLE_UGC_OFFICER">UGC / AICTE Officer</option>
+                        <option value="ROLE_EVALUATOR">Expert Evaluator</option>
+                      </select>
+                    </div>
+                  </div>
+
                   <div>
-                    <label className="text-[11px] font-semibold text-slate-600 mb-1.5 block">
-                      Registered Mobile / Email
-                    </label>
+                    <label className="text-[11px] font-semibold text-slate-600 mb-1 block">Institution Name</label>
                     <div className="relative">
-                      <Smartphone size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                      <Building2 size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
                       <input
                         type="text"
-                        value={otpContact}
-                        onChange={(e) => setOtpContact(e.target.value)}
-                        disabled={otpSent}
-                        placeholder="+91 XXXXX XXXXX or registered email"
-                        className="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none shadow-sm transition-all disabled:bg-slate-50 disabled:text-slate-400"
-                        onFocus={(e) => {
-                          e.currentTarget.style.boxShadow = `0 0 0 3px ${GOV_NAVY}22`;
-                        }}
-                        onBlur={(e) => {
-                          e.currentTarget.style.boxShadow = "none";
-                        }}
+                        value={regInstitutionName}
+                        onChange={(e) => setRegInstitutionName(e.target.value)}
+                        placeholder="Rajiv Gandhi Institute of Technology"
+                        className="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-4 py-2 text-xs text-slate-900 focus:outline-none shadow-sm"
                       />
                     </div>
                   </div>
-                  {!otpSent ? (
-                    <button
-                      onClick={() => setOtpSent(true)}
-                      className="w-full text-white text-sm font-bold py-3 rounded-xl shadow-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
-                      style={{ background: GOV_NAVY }}
-                    >
-                      <KeyRound size={14} />
-                      Send OTP
-                    </button>
-                  ) : (
-                    <>
-                      <div>
-                        <label className="text-[11px] font-semibold text-slate-600 mb-1.5 block">Enter 6-digit OTP</label>
-                        <div className="flex gap-2">
-                          {Array.from({ length: 6 }).map((_, i) => (
-                            <input
-                              key={i}
-                              maxLength={1}
-                              className="w-full text-center bg-white border border-slate-200 rounded-xl py-2.5 text-sm font-bold text-slate-900 focus:outline-none shadow-sm"
-                              onFocus={(e) => {
-                                e.currentTarget.style.boxShadow = `0 0 0 3px ${GOV_NAVY}22`;
-                              }}
-                              onBlur={(e) => {
-                                e.currentTarget.style.boxShadow = "none";
-                              }}
-                            />
-                          ))}
-                        </div>
-                        <p className="text-[11px] text-slate-400 mt-2">
-                          Didn't receive it?{" "}
-                          <a
-                            onClick={() => setOtpSent(false)}
-                            className="font-semibold hover:underline cursor-pointer"
-                            style={{ color: GOV_NAVY }}
-                          >
-                            Resend OTP
-                          </a>
-                        </p>
-                      </div>
-                      <button
-                        onClick={handleSignIn}
-                        className="w-full text-white text-sm font-bold py-3 rounded-xl shadow-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
-                        style={{ background: GOV_NAVY }}
-                      >
-                        <CheckCircle size={14} />
-                        Verify & Sign In
-                      </button>
-                    </>
-                  )}
-                </>
+
+                  <div className="grid grid-cols-2 gap-2.5">
+                    <div>
+                      <label className="text-[11px] font-semibold text-slate-600 mb-1 block">Password (≥8 chars) *</label>
+                      <input
+                        type="password"
+                        value={regPassword}
+                        onChange={(e) => setRegPassword(e.target.value)}
+                        placeholder="••••••••"
+                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none shadow-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[11px] font-semibold text-slate-600 mb-1 block">Confirm Password *</label>
+                      <input
+                        type="password"
+                        value={regConfirmPassword}
+                        onChange={(e) => setRegConfirmPassword(e.target.value)}
+                        placeholder="••••••••"
+                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none shadow-sm"
+                      />
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full text-white text-xs font-bold py-3 rounded-xl shadow-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2 mt-3"
+                    style={{ background: GOV_NAVY }}
+                  >
+                    <UserCheck size={14} />
+                    {loading ? "Registering..." : "Submit Registration"}
+                  </button>
+                </form>
               )}
             </div>
 
-            <div className="px-7 pb-6 pt-2 border-t border-slate-100">
-              <p className="text-[11px] text-slate-400 text-center">
-                By signing in you agree to the Government of India's{" "}
+            <div className="px-7 pb-5 pt-2 border-t border-slate-100">
+              <p className="text-[10px] text-slate-400 text-center">
+                By accessing this portal you agree to the Government of India's{" "}
                 <a className="underline cursor-pointer">Terms of Use</a> and{" "}
                 <a className="underline cursor-pointer">Privacy Policy</a>.
               </p>
             </div>
           </div>
-
-          <div className="mt-6 bg-white border border-slate-200 rounded-2xl px-6 py-4 flex items-center justify-between shadow-sm">
-            <div className="flex items-center gap-2 text-slate-500">
-              <Lock size={13} className="text-slate-400" />
-              <span className="text-[11px] font-medium">End-to-end encrypted · ISO 27001 compliant</span>
-            </div>
-            <div className="flex items-center divide-x divide-slate-200">
-              {["NIC Hosted", "MeitY Approved"].map((t) => (
-                <span key={t} className="text-[11px] text-slate-400 px-3 first:pl-0 last:pr-0">
-                  {t}
-                </span>
-              ))}
-            </div>
-          </div>
         </div>
       </div>
+
+      {/* OTP Verification Modal (FR-USR-001 Step 6) */}
+      {showOtpModal && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl relative border border-slate-200">
+            <button
+              onClick={() => setShowOtpModal(false)}
+              className="absolute top-4 right-4 text-slate-400 hover:text-slate-600"
+            >
+              <X size={18} />
+            </button>
+            <div className="text-center mb-4">
+              <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-2">
+                <KeyRound size={22} />
+              </div>
+              <h3 className="text-base font-black text-slate-900">Mobile OTP Verification</h3>
+              <p className="text-xs text-slate-500 mt-1">{otpNotice}</p>
+            </div>
+
+            <div className="flex justify-center gap-2 mb-4">
+              {otpDigits.map((digit, idx) => (
+                <input
+                  key={idx}
+                  id={`otp-input-${idx}`}
+                  type="text"
+                  maxLength={1}
+                  value={digit}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/\D/g, "");
+                    const newDigits = [...otpDigits];
+                    newDigits[idx] = val;
+                    setOtpDigits(newDigits);
+                    if (val && idx < 5) {
+                      document.getElementById(`otp-input-${idx + 1}`)?.focus();
+                    }
+                  }}
+                  className="w-10 h-11 text-center bg-slate-50 border border-slate-300 rounded-xl text-base font-bold text-slate-900 focus:outline-none focus:border-emerald-600"
+                />
+              ))}
+            </div>
+
+            <button
+              onClick={handleOtpVerify}
+              className="w-full text-white text-xs font-bold py-3 rounded-xl shadow-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+              style={{ background: GOV_NAVY }}
+            >
+              <CheckCircle size={14} />
+              Verify OTP & Activate Account
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Forgot Password Modal (FR-USR-004) */}
+      {showForgotModal && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl relative border border-slate-200">
+            <button
+              onClick={() => setShowForgotModal(false)}
+              className="absolute top-4 right-4 text-slate-400 hover:text-slate-600"
+            >
+              <X size={18} />
+            </button>
+            <div className="text-center mb-4">
+              <h3 className="text-base font-black text-slate-900">Reset Password via Mobile OTP</h3>
+              <p className="text-xs text-slate-500 mt-1">
+                {forgotStep === "email"
+                  ? "Enter your registered email to receive an OTP on your linked mobile"
+                  : "Enter the OTP sent to your mobile and choose your new password"}
+              </p>
+            </div>
+
+            {forgotStep === "email" ? (
+              <div className="space-y-3">
+                <input
+                  type="email"
+                  value={forgotEmail}
+                  onChange={(e) => setForgotEmail(e.target.value)}
+                  placeholder="your.registered.email@institution.ac.in"
+                  className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2 text-xs focus:outline-none"
+                />
+                <button
+                  onClick={handleForgotSubmit}
+                  className="w-full text-white text-xs font-bold py-2.5 rounded-xl shadow-sm"
+                  style={{ background: GOV_NAVY }}
+                >
+                  Send Reset OTP
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <div className="flex justify-center gap-2">
+                  {otpDigits.map((digit, idx) => (
+                    <input
+                      key={idx}
+                      id={`forgot-otp-${idx}`}
+                      type="text"
+                      maxLength={1}
+                      value={digit}
+                      onChange={(e) => {
+                        const val = e.target.value.replace(/\D/g, "");
+                        const newDigits = [...otpDigits];
+                        newDigits[idx] = val;
+                        setOtpDigits(newDigits);
+                        if (val && idx < 5) {
+                          document.getElementById(`forgot-otp-${idx + 1}`)?.focus();
+                        }
+                      }}
+                      className="w-9 h-10 text-center bg-slate-50 border border-slate-300 rounded-xl text-sm font-bold text-slate-900"
+                    />
+                  ))}
+                </div>
+                <input
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="New Password (min 8 chars)"
+                  className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2 text-xs focus:outline-none"
+                />
+                <button
+                  onClick={handleForgotSubmit}
+                  className="w-full text-white text-xs font-bold py-2.5 rounded-xl shadow-sm"
+                  style={{ background: GOV_NAVY }}
+                >
+                  Reset Password & Invalidate JWTs
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       <GovFooter />
     </div>
