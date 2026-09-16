@@ -26,6 +26,22 @@ spring:
       mode: always
       continue-on-error: false
 
+  mail:
+    host: ${SPRING_MAIL_HOST:smtp.gmail.com}
+    port: ${SPRING_MAIL_PORT:587}
+    username: rgnanasri23@gmail.com
+    password: upbjffxvcgtemdhh
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          ssl:
+            trust: smtp.gmail.com
+            protocols: TLSv1.2
+
 eureka:
   client:
     service-url:

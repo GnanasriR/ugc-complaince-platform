@@ -1,0 +1,39 @@
+{
+  "architectures": [
+    "DistilBertForTokenClassification"
+  ],
+  "model_type": "distilbert",
+  "model_name_or_path": "distilbert_ugc_ner_v4",
+  "num_labels": 13,
+  "id2label": {
+    "0": "O",
+    "1": "B-FACULTY_RATIO",
+    "2": "I-FACULTY_RATIO",
+    "3": "B-BUILT_UP_AREA",
+    "4": "I-BUILT_UP_AREA",
+    "5": "B-LIBRARY_BOOKS",
+    "6": "I-LIBRARY_BOOKS",
+    "7": "B-CORPUS_FUND",
+    "8": "I-CORPUS_FUND",
+    "9": "B-FIRE_NOC",
+    "10": "I-FIRE_NOC",
+    "11": "B-LAND_TITLE",
+    "12": "I-LAND_TITLE"
+  },
+  "label2id": {
+    "O": 0,
+    "B-FACULTY_RATIO": 1,
+    "I-FACULTY_RATIO": 2,
+    "B-BUILT_UP_AREA": 3,
+    "I-BUILT_UP_AREA": 4,
+    "B-LIBRARY_BOOKS": 5,
+    "I-LIBRARY_BOOKS": 6,
+    "B-CORPUS_FUND": 7,
+    "I-CORPUS_FUND": 8,
+    "B-FIRE_NOC": 9,
+    "I-FIRE_NOC": 10,
+    "B-LAND_TITLE": 11,
+    "I-LAND_TITLE": 12
+  },
+  "vocab_size": 30522
+}

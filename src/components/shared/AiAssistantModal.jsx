@@ -122,16 +122,87 @@ export default function AiAssistantModal() {
     }
   };
 
+  // Floating Circle Draggable & Position State
+  const [position, setPosition] = useState({
+    x: typeof window !== "undefined" ? window.innerWidth - 80 : 200,
+    y: typeof window !== "undefined" ? window.innerHeight - 80 : 200,
+  });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [hasMoved, setHasMoved] = useState(false);
+
+  const handleMouseDown = (e) => {
+    setIsDragging(true);
+    setHasMoved(false);
+    setDragStart({
+      x: e.clientX - position.x,
+      y: e.clientY - position.y,
+    });
+  };
+
+  const handleMouseMove = (e) => {
+    if (!isDragging) return;
+    setHasMoved(true);
+    const newX = Math.max(10, Math.min(window.innerWidth - 70, e.clientX - dragStart.x));
+    const newY = Math.max(10, Math.min(window.innerHeight - 70, e.clientY - dragStart.y));
+    setPosition({ x: newX, y: newY });
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleTouchStart = (e) => {
+    if (e.touches.length === 1) {
+      setIsDragging(true);
+      setHasMoved(false);
+      setDragStart({
+        x: e.touches[0].clientX - position.x,
+        y: e.touches[0].clientY - position.y,
+      });
+    }
+  };
+
+  const handleTouchMove = (e) => {
+    if (!isDragging || e.touches.length !== 1) return;
+    setHasMoved(true);
+    const newX = Math.max(10, Math.min(window.innerWidth - 70, e.touches[0].clientX - dragStart.x));
+    const newY = Math.max(10, Math.min(window.innerHeight - 70, e.touches[0].clientY - dragStart.y));
+    setPosition({ x: newX, y: newY });
+  };
+
+  const handleButtonClick = () => {
+    if (!hasMoved) {
+      setIsOpen((prev) => !prev);
+    }
+  };
+
   return (
     <>
-      {/* Floating Action Button */}
-      <button
-        onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 z-40 bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600 text-white px-4 py-3 rounded-full shadow-2xl flex items-center gap-2.5 font-bold text-xs border border-white/20 transition-all hover:scale-105 active:scale-95 group"
+      {/* Movable Small Circle Chatbot Button */}
+      <div
+        style={{ left: `${position.x}px`, top: `${position.y}px` }}
+        className="fixed z-50 select-none touch-none"
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleMouseUp}
       >
-        <Sparkles size={16} className="text-emerald-200 animate-pulse group-hover:rotate-12 transition-transform" />
-        <span>Compliance AI Assistant</span>
-      </button>
+        <button
+          type="button"
+          onClick={handleButtonClick}
+          title="Drag to reposition · Click to open Compliance AI Assistant"
+          className="w-14 h-14 rounded-full bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-700 hover:from-emerald-500 hover:to-cyan-600 text-white shadow-2xl flex items-center justify-center border-2 border-white/40 transition-transform hover:scale-110 active:scale-95 group cursor-grab active:cursor-grabbing relative"
+        >
+          <Bot size={26} className="text-white group-hover:rotate-12 transition-transform" />
+          <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-amber-400 border-2 border-slate-900 animate-ping" />
+          <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-amber-400 border-2 border-slate-900 flex items-center justify-center text-[8px] font-black text-slate-950">
+            AI
+          </span>
+        </button>
+      </div>
 
       {/* Floating Modal Window */}
       {isOpen && (

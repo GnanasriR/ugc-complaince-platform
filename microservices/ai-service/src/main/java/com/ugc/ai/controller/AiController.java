@@ -11,9 +11,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/ai")
+@CrossOrigin(originPatterns = "*", allowedHeaders = "*", allowCredentials = "true")
 @RequiredArgsConstructor
 public class AiController {
 
@@ -28,6 +30,32 @@ public class AiController {
     @PostMapping("/reports/generate/{appId}")
     public ResponseEntity<AiReportResponse> generateAndStoreReport(@PathVariable("appId") String appId) {
         return ResponseEntity.ok(reportGeneratorService.generateAndStoreReport(appId));
+    }
+
+    @PostMapping("/reports/application/{appId}")
+    public ResponseEntity<AiReportResponse> saveAppAnalysisReport(@PathVariable("appId") String appId, @RequestBody(required = false) Map<String, Object> body) {
+        Map<String, Object> payload = body != null ? body : Map.of("applicationId", appId);
+        return ResponseEntity.ok(reportGeneratorService.saveReportPayload(payload));
+    }
+
+    @PostMapping("/reports/re-evaluate-all")
+    public ResponseEntity<List<AiReportResponse>> reEvaluateAllReports(@RequestBody(required = false) Map<String, Object> normPayload) {
+        return ResponseEntity.ok(reportGeneratorService.reEvaluateAllReportsWithNorms(normPayload));
+    }
+
+    @PostMapping("/self-assessment-report")
+    public ResponseEntity<AiReportResponse> saveSelfAssessmentReport(@RequestBody Map<String, Object> body) {
+        return ResponseEntity.ok(reportGeneratorService.saveReportPayload(body));
+    }
+
+    @PostMapping("/reports")
+    public ResponseEntity<AiReportResponse> saveReport(@RequestBody Map<String, Object> body) {
+        return ResponseEntity.ok(reportGeneratorService.saveReportPayload(body));
+    }
+
+    @GetMapping("/reports")
+    public ResponseEntity<List<AiReportResponse>> getAllReports() {
+        return ResponseEntity.ok(reportGeneratorService.getAllReports());
     }
 
     @GetMapping("/reports/{reportId}")

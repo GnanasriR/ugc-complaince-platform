@@ -1,0 +1,32 @@
+================================================================================
+UNIVERSITY GRANTS COMMISSION (UGC) COMPLIANCE PORTAL
+ANNEXURE II: LAND OWNERSHIP DEED & INSTRUCTIONAL INFRASTRUCTURE AUDIT
+Academic Cycle: 2024–2025
+================================================================================
+
+INSTITUTION NAME: National Institute of Technology & Advanced Science
+APPLICATION REF ID: APP-2024-0891
+
+1. LAND OWNERSHIP & TITLE DEED DETAILS:
+   - Total Campus Land Area: 10.5 Acres (Continuous contiguous piece)
+   - Title Status: Unencumbered Freehold Ownership Deed
+   - Sub-Registrar Office Registration Deed No: SRO/REG-88921/2018
+   - Land Classification: Educational & Institutional Use Certificate Issued
+
+2. INSTRUCTIONAL BUILT-UP AREA DETAILS:
+   - Total Classrooms & Lecture Halls: 24 (Total Area: 3,200 Sq. Mtrs)
+   - Computer & Science Laboratories: 16 (Total Area: 4,800 Sq. Mtrs)
+   - Administrative & Amenities Built-up Area: 4,500 Sq. Mtrs
+   - TOTAL INSTRUCTIONAL BUILT-UP AREA: 12,500 Sq. Mtrs (Norm: Min 10,000 Sq. Mtrs)
+
+3. SAFETY & ENVIRONMENTAL NOC CLEARANCES:
+   - Fire Safety Department NOC: Issued (Cert No: NOC-9921, Valid till Nov 2026)
+   - Structural Stability Certificate: Approved by Public Works Department (PWD)
+   - Environmental Impact Clearance: Validated
+
+ATTESTATION:
+Certified that all land boundaries and built-up infrastructure details comply with UGC & AICTE infrastructure regulations.
+
+Signed: Chief Civil Engineer & Registrar
+SHA-256 Digest: d4e1c2b3a4f5e67890123456789abcdef
+================================================================================

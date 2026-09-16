@@ -28,17 +28,17 @@ public class UserEntity {
     @Column(nullable = false)
     private String fullName;
 
-    @Column(unique = true, nullable = false)
+    @Column(nullable = true)
     private String mobileNumber;
 
     private String institutionName;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 50, columnDefinition = "VARCHAR(50)")
     private Role role;
 
     @Column(nullable = false)
-    private String status; // PENDING_VERIFICATION, ACTIVE, SUSPENDED
+    private String status; // PENDING_APPROVAL, ACTIVE, REJECTED
 
     private Integer failedLoginAttempts;
 
@@ -50,7 +50,7 @@ public class UserEntity {
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
         if (this.status == null) {
-            this.status = "PENDING_VERIFICATION";
+            this.status = "PENDING_APPROVAL";
         }
         if (this.failedLoginAttempts == null) {
             this.failedLoginAttempts = 0;

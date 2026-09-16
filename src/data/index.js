@@ -10,14 +10,14 @@ import {
   TrendingUp,
   MapPin,
   Lock,
-  CheckCircle,
   AlertTriangle,
-  MessageSquare,
-  FileCheck,
+  CheckCircle2,
+  FileText,
   Bell,
-  FileSearch,
-  Users,
-  BarChart3,
+  ShieldAlert,
+  Clock,
+  MessageSquare,
+  Info,
 } from "lucide-react";
 
 export const PIPELINE_STAGES = [
@@ -46,6 +46,13 @@ export const TREND_DATA = [
   { month: "Oct", apps: 890, approved: 632 },
   { month: "Nov", apps: 760, approved: 561 },
   { month: "Dec", apps: 952, approved: 724 },
+];
+
+export const EVALUATOR_CONSISTENCY = [
+  { evaluatorPair: "Panel Alpha (Engg)", category: "Engineering", cohensKappa: 0.88, status: "CALIBRATED" },
+  { evaluatorPair: "Panel Beta (Medical)", category: "Medical", cohensKappa: 0.92, status: "CALIBRATED" },
+  { evaluatorPair: "Panel Gamma (Management)", category: "Management", cohensKappa: 0.74, status: "CALIBRATION_REQUIRED" },
+  { evaluatorPair: "Panel Delta (Law)", category: "Law", cohensKappa: 0.85, status: "CALIBRATED" },
 ];
 
 export const ANOMALY_CATEGORIES = [
@@ -120,35 +127,62 @@ export const ANOMALIES = [
     detectedAt: "2024-11-14 11:02",
     confidence: 99,
   },
-  {
-    id: "ANO-2024-0044",
-    title: "Faculty Ratio Deterioration (3-Year Trend)",
-    description: "Year-on-year faculty headcount declining: 2022 → 71, 2023 → 55, 2024 → 38 (declared 60). Pattern consistent with artificial inflation.",
-    apps: ["APP-2024-0894", "APP-2024-0898"],
-    severity: "High",
-    category: "Trend Analysis",
-    detectedAt: "2024-11-14 11:47",
-    confidence: 88,
-  },
-  {
-    id: "ANO-2024-0045",
-    title: "Infrastructure Declaration vs. Satellite Verification",
-    description: "Declared built-up area of 85,000 sq. ft. inconsistent with satellite imagery (~61,200 sq. ft.). Delta of 23,800 sq. ft. unexplained.",
-    apps: ["APP-2024-0901"],
-    severity: "High",
-    category: "Infrastructure",
-    detectedAt: "2024-11-14 12:15",
-    confidence: 89,
-  },
 ];
+
+export const UGC_TAXONOMY_STRUCTURE = {
+  general: {
+    id: "general-category",
+    title: "General Category",
+    description: "Standard University & Institutional Compliance Filing",
+    sections: [
+      { id: "eligibility", name: "Eligibility", desc: "Regulatory Standing & State/Central Gazette Establishment Act" },
+      { id: "accreditation", name: "Accreditation / Ranking", desc: "NAAC Grade (A++/A+), NIRF National Ranking, NBA Status" },
+      { id: "faculty_students", name: "Faculty & Students", desc: "Faculty Headcount, PhD Pct (>=70%), Student Intake & Cadre Ratio (1:15)" },
+      { id: "infrastructure", name: "Infrastructure", desc: "Land Area (Acres), Built-Up Sq. Ft, Labs, Library Volumes & IT NOC" },
+      { id: "financial_corpus", name: "Financial / Corpus", desc: "Corpus Fund Reserve (₹5.0 Cr), Audited Financial Balance Sheet" },
+      { id: "documents", name: "Documents", desc: "Mandatory Category Annexures & Regulatory Certificates" },
+    ],
+  },
+  distinct: {
+    id: "distinct-category",
+    title: "Distinct Category",
+    description: "Specialized, Niche & Deemed University Category Filings",
+    subCategories: [
+      {
+        id: "new-institution",
+        title: "New Institution",
+        description: "Fresh Distinct Category University / Deemed Institution Proposal",
+        sections: [
+          { id: "distinct_discipline", name: "Distinct Discipline", desc: "Niche Academic Domain (e.g. AI, Renewable Energy, Quantum Tech)" },
+          { id: "academic_programmes", name: "5 Academic Programmes", desc: "Mandatory Proposal for 5 Distinct Degree/Diploma Programmes" },
+          { id: "infrastructure", name: "Infrastructure", desc: "Purpose-Built Campus Land, Advanced Labs & Research Facilities" },
+          { id: "financial_corpus", name: "Financial / Corpus", desc: "Dedicated Corpus Reserve Deposit (₹10.0 Cr - ₹25.0 Cr)" },
+          { id: "documents", name: "Documents", desc: "DPR Project Report, Statutory Council NOCs & Annexures" },
+        ],
+      },
+      {
+        id: "existing-institution",
+        title: "Existing Institution",
+        description: "Expansion / Addition of Distinct Category Discipline in Active University",
+        sections: [
+          { id: "distinct_discipline", name: "Distinct Discipline", desc: "New Specialized Department / Discipline Addition" },
+          { id: "existing_infrastructure", name: "Existing Infrastructure", desc: "Audit of Existing Campus Wings, Shared Labs & Facility Expansion" },
+          { id: "financial_corpus", name: "Financial / Corpus", desc: "Supplemental Corpus Fund Allocation & Parent Institution Audits" },
+          { id: "documents", name: "Documents", desc: "Parent University Charter, Academic Council Minutes & Annexures" },
+        ],
+      },
+    ],
+  },
+};
 
 export const APPLICATION_CATALOGUE = {
   UGC: [
-    { id: "ugc-university-recognition", label: "University Recognition", desc: "Recognition under Section 2(f) / 12(B) of the UGC Act.", icon: Landmark },
-    { id: "ugc-deemed-university", label: "Deemed-to-be University Application", desc: "Grant of Deemed University status under UGC Regulations.", icon: BadgeCheck },
-    { id: "ugc-autonomous-college", label: "Autonomous College Application", desc: "Grant of autonomous status to an affiliated college.", icon: Star },
-    { id: "ugc-odl-online", label: "ODL / Online Programme Recognition", desc: "Recognition of Open & Distance Learning or Online programmes.", icon: Globe },
-    { id: "ugc-regulation-compliance", label: "UGC Regulation Compliance", desc: "Compliance filing against a specific UGC regulation.", icon: ClipboardList },
+    { id: "ugc-general-category", label: "General Category Application", desc: "Eligibility, NAAC/NIRF Ranking, Faculty-Student Ratio, Infrastructure & Corpus.", categoryGroup: "General Category", icon: Landmark },
+    { id: "ugc-distinct-new", label: "Distinct Category — New Institution", desc: "Niche Discipline, 5 Academic Programmes, Purpose-Built Campus & Corpus.", categoryGroup: "Distinct Category", icon: BadgeCheck },
+    { id: "ugc-distinct-existing", label: "Distinct Category — Existing Institution", desc: "Niche Discipline Addition, Shared Campus Audit & Supplemental Corpus.", categoryGroup: "Distinct Category", icon: Star },
+    { id: "ugc-university-recognition", label: "University Recognition Section 2(f)/12(B)", desc: "Recognition under Section 2(f) / 12(B) of the UGC Act.", categoryGroup: "General Category", icon: Landmark },
+    { id: "ugc-deemed-university", label: "Deemed-to-be University Application", desc: "Grant of Deemed University status under UGC Regulations.", categoryGroup: "Distinct Category", icon: BadgeCheck },
+    { id: "ugc-autonomous-college", label: "Autonomous College Application", desc: "Grant of autonomous status to an affiliated college.", categoryGroup: "General Category", icon: Star },
   ],
   AICTE: [
     { id: "aicte-new-institution", label: "New Institution Approval", desc: "Approval to establish a new technical institution.", icon: Building2 },
@@ -168,11 +202,14 @@ export const BASE_REQUIRED_DOCS = [
 ];
 
 export const EXTRA_REQUIRED_DOC = {
+  "ugc-general-category": "General Category Eligibility & NAAC/NIRF Certificate",
+  "ugc-distinct-new": "Distinct Category DPR Project Proposal & Statutory Council NOC",
+  "ugc-distinct-existing": "Distinct Category Expansion Plan & Parent University Charter",
   "ugc-university-recognition": "Act / Statute of the University",
   "ugc-deemed-university": "UGC (Deemed to be Universities) Regulations Compliance Report",
   "ugc-autonomous-college": "Academic Audit Report",
-  "ugc-odl-online": "SWAYAM / UGC-DEB Approval Letter",
-  "ugc-regulation-compliance": "Regulation-Specific Compliance Certificate",
+  "ugc-odl-online": "DEB Recognition Letter",
+  "ugc-regulation-compliance": "Regulation Specific Self-Assessment Affidavit",
   "aicte-new-institution": "State Government NOC",
   "aicte-eoa": "Previous Year EOA Letter",
   "aicte-new-course": "Curriculum & Syllabus Document",
@@ -181,45 +218,123 @@ export const EXTRA_REQUIRED_DOC = {
   "aicte-programme-closure": "Teach-Out Plan for Enrolled Students",
 };
 
-export const MY_APPLICATIONS = [
-  { id: "APP-2024-0893", cycle: "2024–25", type: "Management", submitted: "2024-10-03", status: "Under Review", nlpScore: 61, stage: "Expert Review", daysElapsed: 42 },
-  { id: "APP-2022-0441", cycle: "2022–23", type: "Management", submitted: "2022-09-14", status: "Approved", nlpScore: 77, stage: "Completed", daysElapsed: 58 },
-  { id: "APP-2020-0213", cycle: "2020–21", type: "Management", submitted: "2020-09-01", status: "Approved", nlpScore: 74, stage: "Completed", daysElapsed: 64 },
-];
+export const MY_APPLICATIONS = [];
 
 export const CHECKLIST_ITEMS = [
-  { id: "chk-1", name: "Faculty Register (Annexure I)", item: "Faculty Register (Annexure I)", done: true },
-  { id: "chk-2", name: "Fee Structure (Annexure II)", item: "Fee Structure (Annexure II)", done: true },
-  { id: "chk-3", name: "Land Documents (Annexure III)", item: "Land Documents (Annexure III)", done: true },
-  { id: "chk-4", name: "Building Plan (Annexure IV)", item: "Building Plan (Annexure IV)", done: true },
+  { id: "chk-1", name: "Faculty Register (Annexure I)", item: "Faculty Register (Annexure I)", done: false },
+  { id: "chk-2", name: "Fee Structure (Annexure II)", item: "Fee Structure (Annexure II)", done: false },
+  { id: "chk-3", name: "Land Documents (Annexure III)", item: "Land Documents (Annexure III)", done: false },
+  { id: "chk-4", name: "Building Plan (Annexure IV)", item: "Building Plan (Annexure IV)", done: false },
   { id: "chk-5", name: "Library Register (Annexure V)", item: "Library Register (Annexure V)", done: false },
-  { id: "chk-6", name: "Lab Inventory (Annexure VI)", item: "Lab Inventory (Annexure VI)", done: true },
-  { id: "chk-7", name: "Payroll Register (Annexure VII)", item: "Payroll Register (Annexure VII)", done: true },
+  { id: "chk-6", name: "Lab Inventory (Annexure VI)", item: "Lab Inventory (Annexure VI)", done: false },
+  { id: "chk-7", name: "Payroll Register (Annexure VII)", item: "Payroll Register (Annexure VII)", done: false },
   { id: "chk-8", name: "Audit Report (Annexure VIII)", item: "Audit Report (Annexure VIII)", done: false },
 ];
 
 export const STATUS_STYLES = {
-  Approved: "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200",
-  Rejected: "bg-red-50 text-red-700 ring-1 ring-red-200",
-  "Under Review": "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200",
-  Flagged: "bg-amber-50 text-amber-700 ring-1 ring-amber-200",
-  Escalated: "bg-teal-50 text-teal-700 ring-1 ring-teal-200",
-  New: "bg-sky-50 text-sky-700 ring-1 ring-sky-200",
+  Approved: "bg-emerald-100 text-emerald-800 border border-emerald-200",
+  "Under Review": "bg-blue-100 text-blue-800 border border-blue-200",
+  Flagged: "bg-amber-100 text-amber-800 border border-amber-200",
+  Rejected: "bg-red-100 text-red-800 border border-red-200",
+  Escalated: "bg-purple-100 text-purple-800 border border-purple-200",
+  New: "bg-sky-100 text-sky-800 border border-sky-200",
+  Pending: "bg-yellow-100 text-yellow-800 border border-yellow-200",
+  "No Active Application": "bg-slate-100 text-slate-600 border border-slate-200",
 };
 
 export const NOTIFICATIONS = {
   institution: [
-    { id: "n1", icon: CheckCircle, tone: "text-emerald-600 bg-emerald-50", title: "Document verification passed", desc: "Annexure IV (Faculty List) cleared NLP cross-check.", time: "12m ago", unread: true },
-    { id: "n2", icon: AlertTriangle, tone: "text-amber-600 bg-amber-50", title: "Action required on Annexure VII", desc: "Land ownership document needs a clearer scan — resubmit.", time: "1h ago", unread: true },
-    { id: "n3", icon: MessageSquare, tone: "text-teal-600 bg-teal-50", title: "New reviewer comment", desc: '"Please clarify the lab equipment valuation for FY24."', time: "3h ago", unread: true },
-    { id: "n4", icon: FileCheck, tone: "text-emerald-600 bg-emerald-50", title: "Application moved to Expert Review", desc: "APP-2024-0893 has cleared document verification.", time: "Yesterday", unread: false },
-    { id: "n5", icon: Bell, tone: "text-slate-500 bg-slate-100", title: "Compliance cycle reminder", desc: "Self-assessment for 2024–25 cycle closes in 9 days.", time: "2d ago", unread: false },
+    {
+      id: "inst-1",
+      title: "Document Verification Action Required",
+      desc: "Annexure III (Faculty List) for APP-2024-0894 requires re-upload due to metadata discrepancy.",
+      time: "15 mins ago",
+      unread: true,
+      tone: "bg-amber-100 text-amber-700",
+      icon: AlertTriangle,
+    },
+    {
+      id: "inst-2",
+      title: "Application Approved",
+      desc: "Rajiv Gandhi Institute of Technology (APP-2024-0891) compliance review completed successfully.",
+      time: "2 hours ago",
+      unread: true,
+      tone: "bg-emerald-100 text-emerald-700",
+      icon: CheckCircle2,
+    },
+    {
+      id: "inst-3",
+      title: "New Reviewer Comment",
+      desc: "UGC Evaluation Committee added a remark on your Fee Structure declaration.",
+      time: "5 hours ago",
+      unread: false,
+      tone: "bg-blue-100 text-blue-700",
+      icon: MessageSquare,
+    },
+    {
+      id: "inst-4",
+      title: "Submission Deadline Reminder",
+      desc: "Annual Compliance Return (2024-25) submission window closes in 5 days.",
+      time: "1 day ago",
+      unread: false,
+      tone: "bg-purple-100 text-purple-700",
+      icon: Clock,
+    },
+    {
+      id: "inst-5",
+      title: "System Update",
+      desc: "UGC AI Portal upgraded to v2.4 with automated cross-annexure validation engine.",
+      time: "2 days ago",
+      unread: false,
+      tone: "bg-slate-100 text-slate-700",
+      icon: Info,
+    },
   ],
   ugc: [
-    { id: "n1", icon: AlertTriangle, tone: "text-red-600 bg-red-50", title: "Critical anomaly flagged", desc: "Coastal Business School — faculty shortfall of 36.7% detected.", time: "8m ago", unread: true },
-    { id: "n2", icon: FileSearch, tone: "text-teal-600 bg-teal-50", title: "NLP scan completed", desc: "14/14 parameters processed for APP-2024-0901.", time: "45m ago", unread: true },
-    { id: "n3", icon: Users, tone: "text-emerald-600 bg-emerald-50", title: "Reviewer assigned", desc: "Dr. Rao assigned to Deccan Inst. of Mgmt. expert review.", time: "2h ago", unread: true },
-    { id: "n4", icon: BarChart3, tone: "text-emerald-600 bg-emerald-50", title: "Weekly compliance report ready", desc: "Cycle 2024–25 throughput summary generated.", time: "Yesterday", unread: false },
-    { id: "n5", icon: Bell, tone: "text-slate-500 bg-slate-100", title: "System maintenance", desc: "NLP engine will briefly restart tonight at 2:00 AM IST.", time: "3d ago", unread: false },
+    {
+      id: "ugc-1",
+      title: "Critical Anomaly Detected",
+      desc: "AI Anomaly Engine flagged Document Forgery Signal for Sunrise Polytechnic College (APP-2024-0894).",
+      time: "8 mins ago",
+      unread: true,
+      tone: "bg-red-100 text-red-700",
+      icon: ShieldAlert,
+    },
+    {
+      id: "ugc-2",
+      title: "New Batch Submission",
+      desc: "14 new university recognition filings uploaded for batch evaluation.",
+      time: "1 hour ago",
+      unread: true,
+      tone: "bg-blue-100 text-blue-700",
+      icon: FileText,
+    },
+    {
+      id: "ugc-3",
+      title: "Committee Hearing Scheduled",
+      desc: "Standing Appellate Committee review set for Vidyapith Engineering College on Nov 18.",
+      time: "3 hours ago",
+      unread: true,
+      tone: "bg-amber-100 text-amber-700",
+      icon: Clock,
+    },
+    {
+      id: "ugc-4",
+      title: "NLP Verification Complete",
+      desc: "Automated extraction and parameter comparison finished for 42 pending applications.",
+      time: "6 hours ago",
+      unread: false,
+      tone: "bg-emerald-100 text-emerald-700",
+      icon: CheckCircle2,
+    },
+    {
+      id: "ugc-5",
+      title: "State Compliance Summary",
+      desc: "Monthly AI compliance metrics generated for Karnataka and Maharashtra zones.",
+      time: "1 day ago",
+      unread: false,
+      tone: "bg-slate-100 text-slate-700",
+      icon: Bell,
+    },
   ],
 };

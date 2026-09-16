@@ -1,4 +1,0 @@
-com\ugc\gateway\filter\JwtAuthGatewayFilter$Config.class
-com\ugc\gateway\filter\JwtAuthGatewayFilter.class
-com\ugc\gateway\ApiGatewayApplication.class
-com\ugc\gateway\config\CorsConfig.class

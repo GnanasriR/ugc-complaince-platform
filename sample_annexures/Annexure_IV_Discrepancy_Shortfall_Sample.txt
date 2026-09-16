@@ -1,0 +1,25 @@
+================================================================================
+UNIVERSITY GRANTS COMMISSION (UGC) COMPLIANCE PORTAL
+ANNEXURE IV: SPECIAL DECLARATION WITH INTENTIONAL SHORTFALL (DISCREPANCY TEST)
+Academic Cycle: 2024–2025
+================================================================================
+
+INSTITUTION NAME: Sample Technical Institute (Shortfall Test File)
+APPLICATION REF ID: APP-2024-SHORTFALL
+
+1. FACULTY HEADCOUNT DECLARATION:
+   - Declared Faculty Headcount: 60 Teachers
+   - Payroll Verified Headcount: 38 Teachers (SHORTFALL DETECTED: 22 Staff, 36.7%)
+   - Computed Faculty-Student Ratio: 1:22 (UGC Benchmark: 1:15)
+   - Status: CRITICAL MISMATCH FLAGGED
+
+2. INSTRUCTIONAL BUILT-UP AREA:
+   - Declared Area: 10,000 Sq. Mtrs
+   - Verified Survey Area: 8,400 Sq. Mtrs (Deficit: 1,600 Sq. Mtrs)
+   - Status: MISMATCH FLAGGED
+
+3. FIRE NOC CLEARANCE:
+   - Status: Expired (Renewal Pending)
+
+NLP Engine Action: Flags Critical Discrepancy Notice for Officer Dispatch.
+================================================================================

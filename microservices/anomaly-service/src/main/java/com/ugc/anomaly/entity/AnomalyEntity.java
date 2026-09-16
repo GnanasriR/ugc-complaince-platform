@@ -30,4 +30,6 @@ public class AnomalyEntity {
     private LocalDateTime detectedAt;
 
     private String affectedApps;
+
+    private String status;
 }

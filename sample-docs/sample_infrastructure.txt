@@ -1,0 +1,9 @@
+NATIONAL INSTITUTE OF TECHNOLOGY TECHCITY
+ANNEXURE II - INFRASTRUCTURE DETAILS
+
+Total Built-up Area: 45,000 sq.ft
+Classrooms Count: 32
+Laboratories Count: 16
+Computer Systems: 450
+Internet Bandwidth: 1000 Mbps
+Hostel Capacity: 800 students

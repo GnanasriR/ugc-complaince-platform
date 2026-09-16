@@ -1,0 +1,11 @@
+# UGC Compliance Platform - Python AI & ML Service Dependencies
+flask>=3.0.0
+flask-cors>=4.0.0
+python-dotenv>=1.0.0
+pypdf>=3.17.0
+requests>=2.31.0
+numpy>=1.24.0
+xgboost>=2.0.0
+torch>=2.0.0
+transformers>=4.35.0
+huggingface-hub>=0.19.0

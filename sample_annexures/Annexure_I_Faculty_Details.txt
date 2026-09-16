@@ -1,0 +1,35 @@
+================================================================================
+UNIVERSITY GRANTS COMMISSION (UGC) & AICTE COMPLIANCE PORTAL
+ANNEXURE I: AFFIDAVIT OF FACULTY HEADCOUNT AND TEACHING STAFF CADRE RATIO
+Academic Cycle: 2024–2025
+================================================================================
+
+INSTITUTION NAME: National Institute of Technology & Advanced Science
+APPLICATION REF ID: APP-2024-0891
+TYPE: Deemed University (Technical & Professional)
+
+1. FACULTY HEADCOUNT DECLARATION:
+   - Total Full-Time regular Professors: 8
+   - Total Associate Professors: 16
+   - Total Assistant Professors: 36
+   - TOTAL REGULAR TEACHING FACULTY: 60
+
+2. FACULTY-TO-STUDENT RATIO EVALUATION:
+   - Total Enrolled Students (UG + PG): 840
+   - Computed Faculty-Student Ratio: 1:14 (Compliant with UGC 1:15 Benchmark)
+
+3. BIOMETRIC ATTENDANCE & AADHAAR SYNCHRONIZATION:
+   - Aadhaar-enabled Biometric Attendance System (AEBAS) Active: YES
+   - Average Monthly Attendance Sync Rate: 96.4%
+
+4. CADRE RATIO COMPLIANCE:
+   - Cadre Distribution (Prof : Assoc Prof : Asst Prof) = 1 : 2 : 4.5
+   - Verified against AICTE Appendix 7 Guidelines: FULLY COMPLIANT
+
+VERIFICATION & ATTESTATION:
+I hereby solemnly affirm that the faculty details provided above are true, complete, and audited against EPF and payroll statements.
+
+Authorized Signatory: Registrar / Principal
+Date of Execution: 15th January 2025
+SHA-256 Hash Digest: a8f5f167f44f4964e6c998dee827110c
+================================================================================

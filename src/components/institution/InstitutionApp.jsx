@@ -1,142 +1,169 @@
-import { useState } from "react";
-import { useNavigate, useParams, Navigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   LayoutDashboard,
-  ClipboardList,
   Brain,
-  FolderOpen,
-  Building2,
+  Upload,
+  Send,
+  User,
   ArrowLeft,
-  PanelLeftClose,
-  PanelLeft,
+  ChevronLeft,
+  ChevronRight,
+  ShieldCheck,
 } from "lucide-react";
-import GovHeader from "../gov/GovHeader";
-import Topbar from "../shared/Topbar";
-import ProfilePage from "../shared/ProfilePage";
-import NotificationsPage from "../shared/NotificationsPage";
-import AiAssistantModal from "../shared/AiAssistantModal";
-import { NOTIFICATIONS } from "../../data";
-import { useAuth } from "../../context/AuthContext";
 import InstDashboard from "./InstDashboard";
-import InstSubmit from "./InstSubmit";
 import InstSelfAssessment from "./InstSelfAssessment";
 import InstDocVault from "./InstDocVault";
+import InstSubmit from "./InstSubmit";
+import ProfilePage from "../shared/ProfilePage";
+import NotificationsPage from "../shared/NotificationsPage";
+import Topbar from "../shared/Topbar";
+import AiAssistantModal from "../shared/AiAssistantModal";
+import { getNotifications } from "../../utils/notifications";
 
-const INST_NAV = [
-  { id: "dashboard", label: "My Dashboard", icon: LayoutDashboard },
-  { id: "submit", label: "New Application", icon: ClipboardList },
+const NAV_ITEMS = [
+  { id: "dashboard", label: "Overview", icon: LayoutDashboard },
   { id: "assess", label: "Self-Assessment", icon: Brain },
-  { id: "vault", label: "Document Vault", icon: FolderOpen },
+  { id: "vault", label: "Document Vault", icon: Upload },
+  { id: "submit", label: "New Application", icon: Send },
 ];
 
-const VALID_VIEWS = new Set([
-  ...INST_NAV.map((n) => n.id),
-  "profile",
-  "notifications",
-]);
-
 export default function InstitutionApp({ myApplications, onSubmitApplication }) {
-  const { view } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { view: routeView } = useParams();
+  const view = routeView || "dashboard";
+
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const gradient = "linear-gradient(135deg,#0B2953,#123B6B)";
 
-  if (!VALID_VIEWS.has(view)) {
-    return <Navigate to="/institution/dashboard" replace />;
-  }
+  const [unreadCount, setUnreadCount] = useState(() =>
+    getNotifications("institution").filter((n) => n.unread).length
+  );
 
-  const instName = user?.institutionName || user?.fullName || "Institution Portal";
+  useEffect(() => {
+    const handleUpdate = () => {
+      setUnreadCount(getNotifications("institution").filter((n) => n.unread).length);
+    };
+    window.addEventListener("ugc_notification_added", handleUpdate);
+    return () => window.removeEventListener("ugc_notification_added", handleUpdate);
+  }, []);
 
   const views = {
     dashboard: <InstDashboard myApplications={myApplications} />,
-    submit: <InstSubmit onSubmitApplication={onSubmitApplication} />,
-    assess: <InstSelfAssessment />,
+    assess: <InstSelfAssessment myApplications={myApplications} />,
     vault: <InstDocVault />,
+    submit: <InstSubmit onSubmitApplication={onSubmitApplication} />,
     profile: <ProfilePage portal="institution" />,
     notifications: <NotificationsPage portal="institution" />,
   };
 
+  const activeView = views[view] || views.dashboard;
+  const gradient = "linear-gradient(135deg, #059669 0%, #0D9488 100%)";
+
   return (
-    <div className="flex flex-col h-screen overflow-hidden relative">
-      <GovHeader ministry="Institution Portal · University Grants Commission" portalTag={instName} />
-      <div className="flex flex-1 bg-background overflow-hidden">
-        <aside
-          className={`shrink-0 border-r border-slate-200 bg-white flex flex-col shadow-sm transition-all duration-300 ease-in-out overflow-hidden ${
-            sidebarOpen ? "w-56" : "w-16"
-          }`}
-        >
-          <div className="p-3 border-b border-slate-100 flex items-center justify-between">
-            {sidebarOpen && (
-              <div className="flex items-center gap-2 px-1">
-                <div className="w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center text-white shrink-0 font-bold text-xs">
-                  <Building2 size={14} />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-xs font-bold text-slate-900 truncate">{instName}</p>
-                  <p className="text-[10px] text-slate-400 font-mono">
-                    {user?.email ? user.email.split("@")[0] : "INST-2024-048"}
-                  </p>
-                </div>
-              </div>
-            )}
-            <button
-              onClick={() => setSidebarOpen((v) => !v)}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors mx-auto"
-              title={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
-            >
-              {sidebarOpen ? <PanelLeftClose size={15} /> : <PanelLeft size={15} />}
-            </button>
+    <div className="flex flex-col h-screen bg-slate-100/70 text-slate-800 font-sans overflow-hidden">
+      {/* Top Banner */}
+      <div className="bg-slate-900 border-b border-slate-800 text-white px-5 py-2 flex items-center justify-between shrink-0 text-xs">
+        <div className="flex items-center gap-2">
+          <div className="w-5 h-5 rounded-md bg-emerald-500 flex items-center justify-center text-slate-950 font-black text-[10px]">
+            U
           </div>
-          <nav className="flex-1 p-2 space-y-1 overflow-y-auto">
-            {INST_NAV.map((item) => (
+          <span className="font-bold tracking-wide">UGC / AICTE Portal</span>
+          <span className="text-slate-400">|</span>
+          <span className="text-slate-300 font-medium">Institution Self-Assessment & Evaluation Portal</span>
+        </div>
+        <div className="flex items-center gap-4 text-slate-300">
+          <span className="flex items-center gap-1.5 text-emerald-400 font-mono font-medium">
+            <ShieldCheck size={13} strokeWidth={2.5} /> Live Assessment Engine
+          </span>
+        </div>
+      </div>
+
+      <div className="flex-1 flex overflow-hidden">
+        {/* Sidebar */}
+        <aside
+          className={`${
+            sidebarOpen ? "w-60" : "w-16"
+          } bg-white border-r border-slate-200/80 flex flex-col justify-between transition-all duration-200 shrink-0 z-10 shadow-xs`}
+        >
+          <div>
+            <div className="p-3.5 border-b border-slate-100 flex items-center justify-between">
+              {sidebarOpen && (
+                <div className="flex items-center gap-2">
+                  <div
+                    className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-xs font-bold shadow-xs"
+                    style={{ background: gradient }}
+                  >
+                    IN
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-slate-900 leading-tight">Institution Portal</p>
+                    <p className="text-[10px] text-slate-400 font-medium">Self-Assessment Portal</p>
+                  </div>
+                </div>
+              )}
               <button
-                key={item.id}
-                onClick={() => navigate(`/institution/${item.id}`)}
-                title={!sidebarOpen ? item.label : undefined}
-                className={`w-full flex items-center transition-all font-semibold ${
-                  sidebarOpen ? "gap-3 px-3 py-2.5 rounded-xl text-left" : "justify-center px-0 py-2.5 rounded-xl"
-                } ${
-                  view === item.id
-                    ? "bg-emerald-50 text-emerald-700 shadow-sm"
-                    : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-                }`}
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors ml-auto cursor-pointer"
               >
-                <item.icon
-                  size={16}
-                  className={`shrink-0 ${view === item.id ? "text-emerald-600" : "text-slate-400"}`}
-                />
-                {sidebarOpen && (
-                  <>
-                    <span className="text-[13px]">{item.label}</span>
-                    {view === item.id && <div className="ml-auto w-1 h-4 rounded-full bg-emerald-500 shrink-0" />}
-                  </>
-                )}
+                {sidebarOpen ? <ChevronLeft size={15} /> : <ChevronRight size={15} />}
               </button>
-            ))}
-          </nav>
-          <div className={`border-t border-slate-100 ${sidebarOpen ? "p-3" : "p-1.5"}`}>
+            </div>
+
+            <nav className="p-2 space-y-0.5">
+              {NAV_ITEMS.map((item) => {
+                const Icon = item.icon;
+                const active = view === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => navigate(`/institution/${item.id}`)}
+                    className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                      active
+                        ? "bg-emerald-50 text-emerald-700 font-bold shadow-2xs"
+                        : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                    } ${!sidebarOpen ? "justify-center px-0" : ""}`}
+                    title={!sidebarOpen ? item.label : undefined}
+                  >
+                    <Icon size={16} className={active ? "text-emerald-700" : "text-slate-400"} />
+                    {sidebarOpen && <span>{item.label}</span>}
+                  </button>
+                );
+              })}
+            </nav>
+          </div>
+
+          <div className="p-2 border-t border-slate-100 space-y-0.5">
+            <button
+              onClick={() => navigate("/institution/profile")}
+              className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-50 transition-all cursor-pointer ${
+                view === "profile" ? "bg-emerald-50 text-emerald-700 font-bold" : ""
+              } ${!sidebarOpen ? "justify-center px-0" : ""}`}
+            >
+              <User size={16} className="text-slate-400" />
+              {sidebarOpen && <span>Profile & Account</span>}
+            </button>
             <button
               onClick={() => navigate("/")}
-              title={!sidebarOpen ? "Back to Home" : undefined}
-              className={`w-full flex items-center text-xs text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition-colors font-medium ${
-                sidebarOpen ? "gap-2 px-3 py-2.5" : "justify-center px-0 py-2.5"
+              className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-semibold text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-all cursor-pointer ${
+                !sidebarOpen ? "justify-center px-0" : ""
               }`}
             >
-              <ArrowLeft size={13} />
+              <ArrowLeft size={15} />
               {sidebarOpen && "Back to Home"}
             </button>
           </div>
         </aside>
+
+        {/* Main Content Area */}
         <div className="flex-1 flex flex-col overflow-hidden">
           <Topbar
             active={view}
             onProfile={() => navigate("/institution/profile")}
             onNotifications={() => navigate("/institution/notifications")}
-            unread={NOTIFICATIONS.institution.filter((n) => n.unread).length}
+            unread={unreadCount}
             gradient={gradient}
           />
-          <main className="flex-1 overflow-y-auto scrollbar-none">{views[view]}</main>
+          <main className="flex-1 overflow-y-auto scrollbar-none">{activeView}</main>
         </div>
       </div>
 

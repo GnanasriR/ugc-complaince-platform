@@ -1,7 +1,0 @@
-com\ugc\nlp\entity\NlpParameterEntity.class
-com\ugc\nlp\config\NlpDataInitializer.class
-com\ugc\nlp\controller\NlpController.class
-com\ugc\nlp\repository\NlpParameterRepository.class
-com\ugc\nlp\service\NlpService.class
-com\ugc\nlp\entity\NlpParameterEntity$NlpParameterEntityBuilder.class
-com\ugc\nlp\NlpServiceApplication.class

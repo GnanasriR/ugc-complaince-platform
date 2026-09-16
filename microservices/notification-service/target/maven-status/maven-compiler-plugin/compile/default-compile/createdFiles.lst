@@ -1,8 +1,0 @@
-com\ugc\notification\entity\NotificationEntity$NotificationEntityBuilder.class
-com\ugc\notification\exception\GlobalExceptionHandler.class
-com\ugc\notification\service\NotificationService.class
-com\ugc\notification\controller\NotificationController.class
-com\ugc\notification\NotificationServiceApplication.class
-com\ugc\notification\entity\NotificationEntity.class
-com\ugc\notification\config\NotificationDataInitializer.class
-com\ugc\notification\repository\NotificationRepository.class

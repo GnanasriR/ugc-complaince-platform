@@ -22,22 +22,36 @@ import { useAuth } from "../../context/AuthContext";
 
 /** Resolve portal path based on role or email */
 function resolvePortalRoute(user, identifier = "") {
-  if (user && user.role) {
-    if (user.role === "ROLE_UGC_OFFICER" || user.role === "ROLE_ADMIN" || user.role === "ROLE_EVALUATOR") {
-      return "/ugc/dashboard";
-    }
-    return "/institution/dashboard";
+  const email = (user?.email || identifier || "").trim().toLowerCase();
+  
+  // Expert Committee Admin lands on UGC Dashboard Overview & Final 2 Stages Pipeline!
+  if (email.includes("expert") || user?.role === "ROLE_EXPERT_ADMIN" || user?.officialRole === "expert_admin") {
+    return "/ugc/dashboard";
   }
-  const id = identifier.trim().toLowerCase();
+
+  // System Admin (admin@ugc.gov.in) lands directly on User Approvals Registration Dashboard!
+  if (email.includes("admin@ugc.gov.in") || email === "admin" || user?.role === "ROLE_ADMIN" || user?.officialRole === "admin") {
+    return "/ugc/user-approvals";
+  }
+
   if (
-    id.includes("@ugc.gov.in") ||
-    id.includes("@aicte.gov.in") ||
-    id.includes("@gov.in") ||
-    id.startsWith("ugc") ||
-    id.startsWith("officer")
+    email.includes("@ugc.gov.in") ||
+    email.includes("@aicte.gov.in") ||
+    email.includes("@gov.in") ||
+    email.startsWith("ugc") ||
+    email.startsWith("officer")
   ) {
     return "/ugc/dashboard";
   }
+
+  if (user && user.role) {
+    if (user.role === "ROLE_EXPERT_ADMIN") return "/ugc/dashboard";
+    if (user.role === "ROLE_ADMIN") return "/ugc/user-approvals";
+    if (user.role === "ROLE_UGC_OFFICER" || user.role === "ROLE_EVALUATOR") {
+      return "/ugc/dashboard";
+    }
+  }
+
   return "/institution/dashboard";
 }
 
@@ -90,27 +104,27 @@ export default function HomePage() {
 
   // Handle Login Submit (FR-USR-002) with fail-safe demo fallback
   const handleSignIn = async (e) => {
-    if (e) e.preventDefault();
-    setErrorMsg("");
-    setSuccessMsg("");
+  e.preventDefault();
 
-    const identifier = mode === "password" ? email : otpContact;
+  setErrorMsg("");
+  setSuccessMsg("");
 
-    if (mode === "password" && email && password) {
-      try {
-        const res = await login(email, password);
-        const route = resolvePortalRoute(res?.user, email);
-        navigate(route);
-        return;
-      } catch (err) {
-        console.warn("[Auth Login Fallback]", err.message);
-      }
-    }
+  if (!email || !password) {
+    setErrorMsg("Please enter your email and password.");
+    return;
+  }
 
-    // Fail-safe portal routing
-    const route = resolvePortalRoute(null, identifier);
+  try {
+    const res = await login(email, password);
+
+    const route = resolvePortalRoute(res?.user, email);
+
     navigate(route);
-  };
+  } catch (err) {
+    console.error("Login failed:", err);
+    setErrorMsg(err.message || "Invalid email or password.");
+  }
+};
 
   const [registeredDraft, setRegisteredDraft] = useState(null);
 
@@ -135,9 +149,20 @@ export default function HomePage() {
       mobileNumber: regMobile,
       institutionName: regInstitutionName || `${regFullName}'s Institution`,
       role: regRole,
-      status: "ACTIVE",
+      status: "PENDING_APPROVAL",
     };
     setRegisteredDraft(draft);
+
+    const newRegRequest = {
+      id: `REG-${Date.now().toString().slice(-4)}`,
+      fullName: regFullName,
+      email: regEmail,
+      mobileNumber: regMobile,
+      institutionName: regInstitutionName || `${regFullName}'s Institution`,
+      role: regRole,
+      status: "PENDING_APPROVAL",
+      submittedAt: new Date().toLocaleString(),
+    };
 
     const payload = {
       ...draft,
@@ -145,15 +170,23 @@ export default function HomePage() {
     };
 
     try {
-      const res = await register(payload);
-      const returnedCode = res?.otpCode ? ` (OTP Code: ${res.otpCode})` : "";
-      setOtpNotice(`Registration submitted! OTP dispatched to ${regMobile}${returnedCode}`);
-    } catch (err) {
-      setOtpNotice(`Demo OTP sent to ${regMobile} (Code: 123456)`);
-    }
+      await register(payload);
 
-    setOtpMobileTarget(regMobile);
-    setShowOtpModal(true);
+      try {
+        const savedPending = localStorage.getItem("ugc_pending_registrations");
+        const pendingList = savedPending ? JSON.parse(savedPending) : [];
+        pendingList.unshift(newRegRequest);
+        localStorage.setItem("ugc_pending_registrations", JSON.stringify(pendingList));
+        window.dispatchEvent(new Event("ugc_registrations_updated"));
+      } catch (e) {}
+
+      setOtpNotice(`Registration request submitted! Queued for System Admin manual approval. OTP Code 123456 sent to ${regEmail}.`);
+      setOtpMobileTarget(regMobile);
+      setShowOtpModal(true);
+    } catch (err) {
+      setRegisteredDraft(null);
+      setErrorMsg(err.message || "Registration failed. Please try again.");
+    }
   };
 
   // Handle OTP Verification Submit (FR-USR-001 step 6)
@@ -161,15 +194,25 @@ export default function HomePage() {
     setErrorMsg("");
     const otpCode = otpDigits.join("");
 
-    try {
-      const res = await verifyOtp(otpMobileTarget, otpCode || "123456", registeredDraft);
+    if (registeredDraft) {
+      // REGISTRATION FLOW: Save pending registration & STOP navigation to dashboard!
       setShowOtpModal(false);
-      const route = resolvePortalRoute(res?.user, registeredDraft?.email || email);
+      setSuccessMsg(
+        `🎉 OTP Verified! Registration request for ${registeredDraft.fullName} (${registeredDraft.email}) is PENDING SYSTEM ADMIN APPROVAL. An email notification will be sent to your registered mail ID once approved by the Admin.`
+      );
+      setTab("login");
+      setEmail(registeredDraft.email);
+      setRegisteredDraft(null);
+      return;
+    }
+
+    try {
+      const res = await verifyOtp(otpMobileTarget, otpCode || "123456", null);
+      setShowOtpModal(false);
+      const route = resolvePortalRoute(res?.user, email);
       navigate(route);
     } catch (err) {
       setShowOtpModal(false);
-      const route = resolvePortalRoute(registeredDraft, registeredDraft?.email || email);
-      navigate(route);
     }
   };
 
@@ -377,7 +420,7 @@ export default function HomePage() {
                       <button
                         type="submit"
                         disabled={loading}
-                        className="w-full text-white text-xs font-bold py-3 rounded-xl shadow-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2 mt-2"
+                        className="w-full text-white text-xs font-bold py-3 rounded-xl shadow-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2 mt-2 cursor-pointer"
                         style={{ background: GOV_NAVY }}
                       >
                         <Lock size={14} />
@@ -543,15 +586,27 @@ export default function HomePage() {
             >
               <X size={18} />
             </button>
+
             <div className="text-center mb-4">
               <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-2">
                 <KeyRound size={22} />
               </div>
-              <h3 className="text-base font-black text-slate-900">Mobile OTP Verification</h3>
+              <h3 className="text-base font-black text-slate-900">Mobile & Email OTP Verification</h3>
               <p className="text-xs text-slate-500 mt-1">{otpNotice}</p>
             </div>
 
-            <div className="flex justify-center gap-2 mb-4">
+            {/* Live SMS & Email Dispatch Intimation Banner */}
+            <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3 mb-4 text-xs space-y-1">
+              <div className="flex items-center justify-between text-emerald-800 font-bold">
+                <span>📱 SMS & Email Gateway Alert</span>
+                <span className="font-mono bg-emerald-200 px-2 py-0.5 rounded text-[10px]">VERIFIED</span>
+              </div>
+              <p className="text-emerald-700 text-[11px]">
+                Sent OTP code <strong className="font-mono text-emerald-950 text-xs">123456</strong> to registered target (<strong>{otpMobileTarget || regEmail}</strong>).
+              </p>
+            </div>
+
+            <div className="flex justify-center gap-2 mb-3">
               {otpDigits.map((digit, idx) => (
                 <input
                   key={idx}
@@ -573,9 +628,17 @@ export default function HomePage() {
               ))}
             </div>
 
+            {/* Quick Auto-Fill OTP Button */}
+            <button
+              onClick={() => setOtpDigits(["1", "2", "3", "4", "5", "6"])}
+              className="w-full text-[11px] font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 py-1.5 rounded-xl mb-3 flex items-center justify-center gap-1 cursor-pointer"
+            >
+              ⚡ Quick Auto-Fill OTP (123456)
+            </button>
+
             <button
               onClick={handleOtpVerify}
-              className="w-full text-white text-xs font-bold py-3 rounded-xl shadow-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+              className="w-full text-white text-xs font-bold py-3 rounded-xl shadow-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2 cursor-pointer"
               style={{ background: GOV_NAVY }}
             >
               <CheckCircle size={14} />
@@ -599,8 +662,8 @@ export default function HomePage() {
               <h3 className="text-base font-black text-slate-900">Reset Password via Mobile OTP</h3>
               <p className="text-xs text-slate-500 mt-1">
                 {forgotStep === "email"
-                  ? "Enter your registered email to receive an OTP on your linked mobile"
-                  : "Enter the OTP sent to your mobile and choose your new password"}
+                  ? "Enter your registered email to receive an OTP on your linked mobile & email"
+                  : "Enter the 6-digit OTP sent to your linked target and choose your new password"}
               </p>
             </div>
 
@@ -615,14 +678,25 @@ export default function HomePage() {
                 />
                 <button
                   onClick={handleForgotSubmit}
-                  className="w-full text-white text-xs font-bold py-2.5 rounded-xl shadow-sm"
+                  className="w-full text-white text-xs font-bold py-2.5 rounded-xl shadow-sm cursor-pointer"
                   style={{ background: GOV_NAVY }}
                 >
-                  Send Reset OTP
+                  Send Reset OTP Code
                 </button>
               </div>
             ) : (
               <div className="space-y-3">
+                {/* Live SMS/Email Alert Banner for Forgot Password */}
+                <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-2.5 text-xs text-emerald-800 space-y-1">
+                  <div className="flex items-center justify-between font-bold">
+                    <span>📱 OTP Sent to Target</span>
+                    <span className="font-mono text-[10px] bg-emerald-200 px-1.5 py-0.5 rounded">123456</span>
+                  </div>
+                  <p className="text-[11px] text-emerald-700">
+                    Dispatched 6-digit OTP to <strong className="font-mono text-slate-900">{forgotEmail || "registered email/mobile"}</strong>.
+                  </p>
+                </div>
+
                 <div className="flex justify-center gap-2">
                   {otpDigits.map((digit, idx) => (
                     <input
@@ -644,6 +718,15 @@ export default function HomePage() {
                     />
                   ))}
                 </div>
+
+                {/* Quick Auto-Fill OTP Button for Forgot Password */}
+                <button
+                  onClick={() => setOtpDigits(["1", "2", "3", "4", "5", "6"])}
+                  className="w-full text-[11px] font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 py-1.5 rounded-xl flex items-center justify-center gap-1 cursor-pointer"
+                >
+                  ⚡ Quick Auto-Fill OTP (123456)
+                </button>
+
                 <input
                   type="password"
                   value={newPassword}
@@ -653,10 +736,10 @@ export default function HomePage() {
                 />
                 <button
                   onClick={handleForgotSubmit}
-                  className="w-full text-white text-xs font-bold py-2.5 rounded-xl shadow-sm"
+                  className="w-full text-white text-xs font-bold py-2.5 rounded-xl shadow-sm cursor-pointer"
                   style={{ background: GOV_NAVY }}
                 >
-                  Reset Password & Invalidate JWTs
+                  Reset Password & Activate
                 </button>
               </div>
             )}

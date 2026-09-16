@@ -11,6 +11,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/anomalies")
+@CrossOrigin(originPatterns = "*", allowedHeaders = "*", allowCredentials = "true")
 @RequiredArgsConstructor
 public class AnomalyController {
 
@@ -24,6 +25,23 @@ public class AnomalyController {
     @GetMapping("/{id}")
     public ResponseEntity<AnomalyEntity> getAnomalyById(@PathVariable("id") String id) {
         return ResponseEntity.ok(anomalyService.getAnomalyById(id));
+    }
+
+    @PostMapping({"", "/", "/create"})
+    public ResponseEntity<AnomalyEntity> createAnomaly(@RequestBody AnomalyEntity anomaly) {
+        return ResponseEntity.ok(anomalyService.saveAnomaly(anomaly));
+    }
+
+    @PostMapping("/{id}/resolve")
+    public ResponseEntity<Map<String, Object>> resolveAnomalyPost(@PathVariable("id") String id) {
+        boolean success = anomalyService.resolveAnomaly(id);
+        return ResponseEntity.ok(Map.of("id", id, "resolved", success, "status", "RESOLVED"));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Map<String, Object>> resolveAnomalyDelete(@PathVariable("id") String id) {
+        boolean success = anomalyService.resolveAnomaly(id);
+        return ResponseEntity.ok(Map.of("id", id, "resolved", success, "status", "RESOLVED"));
     }
 
     @PostMapping("/{id}/dispatch-notice")

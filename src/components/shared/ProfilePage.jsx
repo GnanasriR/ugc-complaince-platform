@@ -13,6 +13,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import PageHeader from "./PageHeader";
+import { getLiveAnomalies } from "../../utils/anomalies";
 
 export default function ProfilePage({ portal }) {
   const navigate = useNavigate();
@@ -35,7 +36,7 @@ export default function ProfilePage({ portal }) {
     since: "Registered User Account",
     tag: user?.status ? `Status: ${user.status}` : "Verified Active Session",
     gradient: isInst ? "linear-gradient(135deg,#065F46,#0D9488)" : "linear-gradient(135deg,#052E2B,#059669)",
-    icon: isInst ? Building2 : Shield,
+    icon: isInst ? Building2 : ShieldCheck,
     stats: isInst
       ? [
           { l: "Applications filed", v: "1" },
@@ -44,7 +45,7 @@ export default function ProfilePage({ portal }) {
         ]
       : [
           { l: "Reviewed this cycle", v: "312" },
-          { l: "Anomalies flagged", v: "28" },
+          { l: "Anomalies flagged", v: String(getLiveAnomalies().length) },
           { l: "Avg. review time", v: "2.4d" },
         ],
   };

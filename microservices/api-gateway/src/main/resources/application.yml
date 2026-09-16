@@ -1,15 +1,29 @@
 server:
-  port: 8080
+  port: 8090
 
 spring:
-  application:
-    name: api-gateway
   cloud:
     gateway:
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins:
+              - "http://localhost:5173"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders:
+              - "*"
+            allowCredentials: true
+
       discovery:
         locator:
           enabled: true
           lower-case-service-id: true
+
       routes:
         - id: auth-service
           uri: lb://auth-service
@@ -20,41 +34,56 @@ spring:
           uri: lb://application-service
           predicates:
             - Path=/api/v1/applications/**
+          filters:
+            - JwtAuthGatewayFilter
 
         - id: nlp-service
           uri: lb://nlp-service
           predicates:
             - Path=/api/v1/nlp/**
+          filters:
+            - JwtAuthGatewayFilter
 
         - id: ml-service
           uri: lb://ml-service
           predicates:
             - Path=/api/v1/ml/**
+          filters:
+            - JwtAuthGatewayFilter
 
         - id: anomaly-service
           uri: lb://anomaly-service
           predicates:
             - Path=/api/v1/anomalies/**
+          filters:
+            - JwtAuthGatewayFilter
 
         - id: analytics-service
           uri: lb://analytics-service
           predicates:
             - Path=/api/v1/analytics/**
+          filters:
+            - JwtAuthGatewayFilter
 
         - id: notification-service
           uri: lb://notification-service
           predicates:
             - Path=/api/v1/notifications/**
+          filters:
+            - JwtAuthGatewayFilter
 
         - id: ai-service
           uri: lb://ai-service
           predicates:
             - Path=/api/v1/ai/**
-
+          filters:
+            - JwtAuthGatewayFilter
+  application:
+    name: api-gateway
 eureka:
   client:
     service-url:
       defaultZone: http://localhost:8761/eureka/
 
 jwt:
-  secret: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+  secret: mySuperSecretKeyForUGCProject12345678901234567890

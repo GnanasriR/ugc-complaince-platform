@@ -30,11 +30,75 @@ export function AuthProvider({ children }) {
   const login = async (email, password) => {
     setLoading(true);
     try {
+      const cleanEmail = (email || "").trim().toLowerCase();
+      const isAdmin = cleanEmail.includes("admin@ugc.gov.in") || cleanEmail.startsWith("admin");
+
+      // Check pending admin approval status for non-admin users
+      if (!isAdmin) {
+        let pendingRequests = [];
+        try {
+          const saved = localStorage.getItem("ugc_pending_registrations");
+          if (saved) pendingRequests = JSON.parse(saved);
+        } catch (e) {}
+
+        const userPendingRec = pendingRequests.find(
+          (u) => (u.email || "").trim().toLowerCase() === cleanEmail
+        );
+
+        if (userPendingRec) {
+          if (userPendingRec.status === "PENDING_APPROVAL") {
+            throw new Error(
+              `🔒 Access Denied: Registration for '${email}' is PENDING SYSTEM ADMIN APPROVAL. An email notification will be sent to your registered mail ID once approved by the Admin.`
+            );
+          } else if (userPendingRec.status === "REJECTED") {
+            throw new Error(
+              `❌ Access Denied: Registration request for '${email}' was declined by the System Administrator.`
+            );
+          }
+        }
+      }
+
       const res = await authApi.login({ email, password });
       if (res && res.token) {
+        const isUgcOfficer =
+          isAdmin ||
+          cleanEmail.includes("@ugc.gov.in") ||
+          cleanEmail.includes("@aicte.gov.in") ||
+          cleanEmail.includes("@gov.in") ||
+          cleanEmail.startsWith("ugc") ||
+          cleanEmail.startsWith("officer");
+
+        const loggedUser = {
+          id: Date.now(),
+          email: email,
+          fullName: isAdmin
+            ? "System Administrator (admin@ugc.gov.in)"
+            : isUgcOfficer
+              ? "UGC Regulatory Officer (Shali)"
+              : "Institutional Applicant",
+          institutionName: isAdmin
+            ? "UGC National Super Admin Desk"
+            : isUgcOfficer
+              ? "UGC Compliance Cell"
+              : "State Technological University",
+          role: isAdmin ? "ROLE_ADMIN" : isUgcOfficer ? "ROLE_UGC_OFFICER" : (res.user?.role || "ROLE_INSTITUTION"),
+          officialRole: isAdmin ? "admin" : isUgcOfficer ? "evaluator" : "institution",
+          status: "ACTIVE",
+          ...(res.user || {}),
+        };
+
+        if (isAdmin) {
+          loggedUser.role = "ROLE_ADMIN";
+          loggedUser.officialRole = "admin";
+        } else if (isUgcOfficer) {
+          loggedUser.role = "ROLE_UGC_OFFICER";
+        }
+
         setToken(res.token);
-        setUser(res.user);
-        return res;
+        setUser(loggedUser);
+        localStorage.setItem("ugc_auth_token", res.token);
+        localStorage.setItem("ugc_auth_user", JSON.stringify(loggedUser));
+        return { ...res, user: loggedUser };
       }
       throw new Error("Invalid response from auth server");
     } finally {

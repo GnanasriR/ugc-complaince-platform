@@ -4,6 +4,7 @@ import lombok.Data;
 
 @Data
 public class SelfAssessmentRequest {
+    private String applicationId;
     private String facultyStudentRatio;
     private Double phdFacultyPct;
     private Double builtUpAreaSqFt;

@@ -1,0 +1,326 @@
+UGC DEEMED-TO-BE-UNIVERSITY APPLICATION NORMS
+Regulation: UGC (Institutions Deemed to be Universities) Regulations, 2023
+
+
+============================================================
+1. GENERAL CATEGORY
+============================================================
+
+NORM: Minimum Number of Departments
+VALUE: 5 departments
+
+NORM: Minimum Academic Programmes
+VALUE: 5 programmes
+
+NORM: Minimum NAAC Accreditation Score
+VALUE: 3.01 CGPA
+
+NORM: NAAC Accreditation Cycles
+VALUE: 3 consecutive cycles
+
+NORM: NBA Accredited Programme Requirement
+VALUE: At least 2/3 of eligible technical programmes
+
+NORM: NBA Accreditation Cycles
+VALUE: 3 consecutive cycles
+
+NORM: NIRF Category Ranking
+VALUE: Top 50 in the relevant category
+
+NORM: NIRF Category Ranking Duration
+VALUE: 3 consecutive years
+
+NORM: NIRF Overall Ranking
+VALUE: Top 100 overall
+
+NORM: NIRF Overall Ranking Duration
+VALUE: 3 consecutive years
+
+NORM: Teacher-Student Ratio
+VALUE: 1:20
+
+NORM: Minimum Number of Teachers
+VALUE: 150 teachers
+
+NORM: Minimum Student Strength
+VALUE: 3,000 students
+
+NORM: Minimum PG/Research Student Proportion
+VALUE: At least 1/5 of total students
+
+NORM: Teaching Mode
+VALUE: Regular classroom mode
+
+NORM: Academic Infrastructure
+VALUE: As per UGC / relevant statutory body norms
+
+NORM: Physical Infrastructure
+VALUE: As per UGC / relevant statutory body norms
+
+NORM: Professional Programme Approval
+VALUE: Approval from relevant statutory body
+
+NORM: Corpus Fund
+VALUE: ₹25 Crore
+
+NORM: Corpus Fund Applicability
+VALUE: Institutions not funded by Government
+
+NORM: Land Ownership / Lease
+VALUE: Sale deed OR minimum 30-year lease
+
+NORM: Strategic Vision Plan
+VALUE: 15 years
+
+NORM: Implementation Plan
+VALUE: 5-year rolling implementation plan
+
+NORM: DPR
+VALUE: Detailed Project Report required
+
+NORM: Financial Sustainability
+VALUE: Financial sustainability plan required
+
+NORM: Statutory Compliance
+VALUE: Compliance with UGC Act, Rules and 2023 Regulations
+
+
+============================================================
+2. DISTINCT CATEGORY - NEW INSTITUTION
+============================================================
+
+NORM: Regulation 4(1) Eligibility
+VALUE: EXEMPT
+
+NORM: NAAC Requirement
+VALUE: Not applicable under Regulation 4(1)
+
+NORM: NBA Requirement
+VALUE: Not applicable under Regulation 4(1)
+
+NORM: NIRF Ranking Requirement
+VALUE: Not applicable under Regulation 4(1)
+
+NORM: Minimum Teachers
+VALUE: No fixed 150-teacher requirement under Regulation 4(1)
+
+NORM: Minimum Students
+VALUE: No fixed 3,000-student requirement under Regulation 4(1)
+
+NORM: Minimum Academic Programmes at Start
+VALUE: 5 programmes
+
+NORM: Programme Types
+VALUE: UG / PG / Integrated / Research / combination
+
+NORM: Distinct Discipline
+VALUE: Required
+
+NORM: Distinct Discipline Areas
+VALUE:
+- Unique disciplines
+- Strategic needs of the country
+- Indian cultural heritage
+- Environment
+- Skill development
+- Sports
+- Languages
+- Other disciplines determined by Expert Committee
+
+NORM: Expert Committee Assessment
+VALUE: Required
+
+NORM: Academic Infrastructure
+VALUE: As per UGC / relevant statutory body norms
+
+NORM: Physical Infrastructure
+VALUE: As per UGC / relevant statutory body norms
+
+NORM: Professional Programme Approval
+VALUE: Approval from relevant statutory body
+
+NORM: Corpus Fund
+VALUE: ₹25 Crore / amount prescribed by UGC from time to time,
+subject to applicable provisions
+
+NORM: Land Ownership / Lease
+VALUE: Sale deed OR minimum 30-year lease
+
+NORM: Strategic Vision Plan
+VALUE: 15 years
+
+NORM: Implementation Plan
+VALUE: 5-year rolling implementation plan
+
+NORM: DPR
+VALUE: Detailed Project Report required
+
+NORM: Financial Sustainability
+VALUE: Financial sustainability plan required
+
+NORM: Statutory Compliance
+VALUE: Compliance with UGC Act, Rules and 2023 Regulations
+
+
+============================================================
+3. DISTINCT CATEGORY - EXISTING INSTITUTION
+============================================================
+
+NORM: Regulation 4(1) Eligibility
+VALUE: EXEMPT
+
+NORM: NAAC Requirement
+VALUE: Not applicable under Regulation 4(1)
+
+NORM: NBA Requirement
+VALUE: Not applicable under Regulation 4(1)
+
+NORM: NIRF Ranking Requirement
+VALUE: Not applicable under Regulation 4(1)
+
+NORM: Minimum Teachers
+VALUE: No fixed 150-teacher requirement under Regulation 4(1)
+
+NORM: Minimum Students
+VALUE: No fixed 3,000-student requirement under Regulation 4(1)
+
+NORM: Distinct Discipline
+VALUE: Required
+
+NORM: Distinct Discipline Areas
+VALUE:
+- Unique disciplines
+- Strategic needs of the country
+- Indian cultural heritage
+- Environment
+- Skill development
+- Sports
+- Languages
+- Other disciplines determined by Expert Committee
+
+NORM: Expert Committee Assessment
+VALUE: Required
+
+NORM: Existing Academic Infrastructure
+VALUE: Required
+
+NORM: Existing Physical Infrastructure
+VALUE: Required
+
+NORM: Professional Programme Approval
+VALUE: Approval from relevant statutory body
+
+NORM: Corpus Fund
+VALUE: ₹25 Crore / amount prescribed by UGC from time to time,
+subject to applicable provisions
+
+NORM: Land Ownership / Lease
+VALUE: Sale deed OR minimum 30-year lease
+
+NORM: Strategic Vision Plan
+VALUE: 15 years
+
+NORM: Implementation Plan
+VALUE: 5-year rolling implementation plan
+
+NORM: DPR
+VALUE: Detailed Project Report required
+
+NORM: Financial Sustainability
+VALUE: Financial sustainability plan required
+
+NORM: Statutory Compliance
+VALUE: Compliance with UGC Act, Rules and 2023 Regulations
+
+
+============================================================
+COMMON DOCUMENT NORMS
+============================================================
+
+NORM: NOC from Affiliating University
+VALUE: Required where applicable
+
+NORM: Detailed Project Report
+VALUE: Required
+
+NORM: Strategic Vision
+VALUE: 15 years
+
+NORM: Rolling Implementation Plan
+VALUE: 5 years
+
+NORM: Academic Plan
+VALUE: Required
+
+NORM: Faculty Recruitment Plan
+VALUE: Required
+
+NORM: Student Admission Plan
+VALUE: Required
+
+NORM: Research Plan
+VALUE: Required
+
+NORM: ICT Plan
+VALUE: Required
+
+NORM: Infrastructure Development Plan
+VALUE: Required
+
+NORM: Finance Plan
+VALUE: Required
+
+NORM: Administrative Plan
+VALUE: Required
+
+NORM: Governance Plan
+VALUE: Required
+
+NORM: Sponsoring Body Details
+VALUE: Required
+
+NORM: Key Academic Personnel Details
+VALUE: Required
+
+NORM: Key Administrative Personnel Details
+VALUE: Required
+
+NORM: Land Documents
+VALUE: Sale deed OR minimum 30-year lease
+
+NORM: Statutory Body Approvals
+VALUE: Required for applicable professional programmes
+
+NORM: Financial Sustainability Details
+VALUE: Required
+
+NORM: Corpus Fund Details
+VALUE: Required
+
+NORM: UGC Compliance Undertaking
+VALUE: Required
+
+
+============================================================
+IMPORTANT NUMERICAL VALUES
+============================================================
+
+Minimum Departments                  = 5
+Minimum Programmes                   = 5
+Minimum NAAC CGPA                    = 3.01
+NAAC Consecutive Cycles              = 3
+NBA Eligible Programme Ratio         = 2/3
+NBA Consecutive Cycles               = 3
+NIRF Category Ranking                = Top 50
+NIRF Category Ranking Duration       = 3 years
+NIRF Overall Ranking                 = Top 100
+NIRF Overall Ranking Duration        = 3 years
+Teacher : Student Ratio              = 1:20
+Minimum Teachers                     = 150
+Minimum Students                     = 3,000
+Minimum PG/Research Students         = 1/5
+Corpus Fund                          = ₹25 Crore
+Minimum Land Lease                   = 30 years
+Strategic Vision Plan                = 15 years
+Rolling Implementation Plan          = 5 years
+Distinct New Institution Programmes  = 5
